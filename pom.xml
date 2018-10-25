@@ -8,18 +8,52 @@
     <artifactId>excel-io</artifactId>
     <version>1.0-SNAPSHOT</version>
 
+    <name>Excel IO</name>
+    <url>https://github.com/developframework/excel-io</url>
+    <description>Excel读取写入器</description>
+    <inceptionYear>2018</inceptionYear>
+
+    <developers>
+        <developer>
+            <name>qiuzhenhao</name>
+            <email>408000511@qq.com</email>
+            <organization>developframework</organization>
+            <organizationUrl>http://blog.qiushuicloud.xyz</organizationUrl>
+        </developer>
+    </developers>
+
+    <issueManagement>
+        <system>GitHub Issues</system>
+        <url>https://github.com/developframework/excel-io</url>
+    </issueManagement>
+
+    <licenses>
+        <license>
+            <name>The Apache License, Version 2.0</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+        </license>
+    </licenses>
+
+    <scm>
+        <connection>scm:git:git@github.com:developframework/excel-io.git</connection>
+        <developerConnection>scm:git:git@github.com:developframework/excel-io.git</developerConnection>
+        <url>https://github.com/developframework/excel-io</url>
+        <tag>${project.version}</tag>
+    </scm>
+
     <properties>
         <version.lombok>1.18.2</version.lombok>
         <version.poi>3.17</version.poi>
+        <version.commons-lang3>3.8.1</version.commons-lang3>
     </properties>
 
     <dependencies>
-<dependency>
-    <groupId>org.projectlombok</groupId>
-    <artifactId>lombok</artifactId>
-    <version>${version.lombok}</version>
-    <optional>true</optional>
-</dependency>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>${version.lombok}</version>
+            <optional>true</optional>
+        </dependency>
         <dependency>
             <groupId>org.apache.poi</groupId>
             <artifactId>poi</artifactId>
@@ -33,12 +67,73 @@
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
-            <version>3.8.1</version>
-        </dependency>
-        <dependency>
-            <groupId>com.github.developframework</groupId>
-            <artifactId>mock-text</artifactId>
-            <version>0.2</version>
+            <version>${version.commons-lang3}</version>
         </dependency>
     </dependencies>
+
+    <distributionManagement>
+        <snapshotRepository>
+            <id>ossrh</id>
+            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+        </snapshotRepository>
+        <repository>
+            <id>ossrh</id>
+            <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+        </repository>
+    </distributionManagement>
+
+    <build>
+        <plugins>
+            <plugin>
+                <artifactId>maven-source-plugin</artifactId>
+                <version>3.0.1</version>
+                <executions>
+                    <execution>
+                        <id>attach-sources</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>jar-no-fork</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <artifactId>maven-release-plugin</artifactId>
+                <configuration>
+                    <tagNameFormat>v@{project.version}</tagNameFormat>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+    <profiles>
+        <profile>
+            <id>release</id>
+
+            <activation>
+                <property>
+                    <name>performRelease</name>
+                    <value>true</value>
+                </property>
+            </activation>
+
+            <build>
+                <plugins>
+                    <plugin>
+                        <artifactId>maven-gpg-plugin</artifactId>
+                        <version>1.5</version>
+                        <executions>
+                            <execution>
+                                <id>sign-artifacts</id>
+                                <phase>verify</phase>
+                                <goals>
+                                    <goal>sign</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 </project>

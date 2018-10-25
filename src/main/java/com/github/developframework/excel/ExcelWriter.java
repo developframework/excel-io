@@ -116,6 +116,8 @@ public class ExcelWriter extends ExcelProcessor {
             }
         }
 
+        int[] columnCharMaxLength = new int[columnDefinitions.length];
+
         // 填充表内容
         for (int i = 0; i < list.size(); i++) {
             T item = list.get(i);
@@ -137,6 +139,8 @@ public class ExcelWriter extends ExcelProcessor {
                 } else {
                     try {
                         Object value = FieldUtils.readDeclaredField(item, columnDefinition.getFieldName(), true);
+                        int length = value.toString().length();
+                        columnCharMaxLength[j] = length > columnCharMaxLength[j] ? length : columnCharMaxLength[j];
                         columnDefinition.fillData(cell, value);
                     } catch (IllegalAccessException e) {
                         throw new RuntimeException(e);
@@ -153,7 +157,9 @@ public class ExcelWriter extends ExcelProcessor {
 
         // 自动列宽
         for (int i = 0; i < columnDefinitions.length; i++) {
-            sheet.autoSizeColumn(i);
+//            sheet.autoSizeColumn(i);
+            int maxLength = columnDefinitions[i].getMaxLength() != null ? columnDefinitions[i].getMaxLength() : columnCharMaxLength[i];
+            sheet.setColumnWidth(i + tableDefinition.column(), (maxLength + 10) * 256);
         }
     }
 

@@ -23,6 +23,8 @@ public abstract class ColumnDefinition {
 
     protected String fieldName;
 
+    protected Integer maxLength;
+
     /**
      * 加边框
      *

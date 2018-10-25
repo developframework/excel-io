@@ -32,6 +32,11 @@ public class DateTimeColumnDefinition extends BasicColumnDefinition {
         this.cellStyle.setDataFormat(dataFormat.getFormat(pattern));
     }
 
+    public DateTimeColumnDefinition(Workbook workbook, String header, String field, String pattern, int maxLength) {
+        this(workbook, header, field, pattern);
+        this.maxLength = maxLength;
+    }
+
     @Override
     public void dealFillData(Cell cell, Object value) {
         Class<?> valueClass = value.getClass();

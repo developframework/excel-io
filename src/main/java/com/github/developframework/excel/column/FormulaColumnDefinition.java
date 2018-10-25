@@ -10,7 +10,7 @@ public class FormulaColumnDefinition extends ColumnDefinition {
 
     private String formula;
 
-    public FormulaColumnDefinition(Workbook workbook, String header, String formula, String format) {
+    public FormulaColumnDefinition(Workbook workbook, String header, String formula, String format, int maxLength) {
         this.header = header;
         this.formula = formula;
         this.cellStyle = workbook.createCellStyle();
@@ -22,6 +22,7 @@ public class FormulaColumnDefinition extends ColumnDefinition {
             DataFormat dataFormat = workbook.createDataFormat();
             this.cellStyle.setDataFormat(dataFormat.getFormat(format));
         }
+        this.maxLength = maxLength;
     }
 
     @Override
