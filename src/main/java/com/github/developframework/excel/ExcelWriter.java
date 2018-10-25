@@ -1,6 +1,7 @@
 package com.github.developframework.excel;
 
 import com.github.developframework.excel.column.ColumnDefinition;
+import com.github.developframework.excel.column.FormulaColumnDefinition;
 import org.apache.commons.lang3.reflect.FieldUtils;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.util.IOUtils;
@@ -33,7 +34,19 @@ public class ExcelWriter extends ExcelProcessor {
      * @return
      */
     public <T> ExcelWriter fillData(List<T> data, TableDefinition tableDefinition) {
-        dealFillData(workbook, data, tableDefinition);
+        dealFillData(workbook, data, tableDefinition, null);
+        return this;
+    }
+
+    /**
+     * 填充数据
+     *
+     * @param data
+     * @param tableDefinition
+     * @return
+     */
+    public <T> ExcelWriter fillData(List<T> data, TableDefinition tableDefinition, ExtraOperate extraOperate) {
+        dealFillData(workbook, data, tableDefinition, extraOperate);
         return this;
     }
 
@@ -45,7 +58,19 @@ public class ExcelWriter extends ExcelProcessor {
      * @return
      */
     public <T> ExcelWriter fillData(T[] data, TableDefinition tableDefinition) {
-        dealFillData(workbook, Arrays.asList(data), tableDefinition);
+        dealFillData(workbook, Arrays.asList(data), tableDefinition, null);
+        return this;
+    }
+
+    /**
+     * 填充数据
+     *
+     * @param data
+     * @param tableDefinition
+     * @return
+     */
+    public <T> ExcelWriter fillData(T[] data, TableDefinition tableDefinition, ExtraOperate extraOperate) {
+        dealFillData(workbook, Arrays.asList(data), tableDefinition, extraOperate);
         return this;
     }
 
@@ -67,14 +92,15 @@ public class ExcelWriter extends ExcelProcessor {
      * @param workbook
      * @param list
      * @param tableDefinition
+     * @param extraOperate
      */
-    private <T> void dealFillData(Workbook workbook, List<T> list, TableDefinition tableDefinition) {
+    private <T> void dealFillData(Workbook workbook, List<T> list, TableDefinition tableDefinition, ExtraOperate extraOperate) {
         Sheet sheet = getSheet(workbook, tableDefinition);
         int rowIndex = tableDefinition.row();
         int columnIndex;
         ColumnDefinition[] columnDefinitions = tableDefinition.columnDefinitions(workbook);
         // 填充表头
-        if(tableDefinition.hasHeader()) {
+        if (tableDefinition.hasHeader()) {
             Row headerRow = sheet.createRow(rowIndex++);
             columnIndex = tableDefinition.column();
             CellStyle headerCellStyle = workbook.createCellStyle();
@@ -97,20 +123,33 @@ public class ExcelWriter extends ExcelProcessor {
             columnIndex = tableDefinition.column();
             for (int j = 0; j < columnDefinitions.length; j++) {
                 ColumnDefinition columnDefinition = columnDefinitions[j];
-                if(columnDefinition == null) {
+                if (columnDefinition == null) {
                     continue;
                 }
+
                 Cell cell = row.createCell(columnIndex + j);
                 cell.setCellType(columnDefinition.getCellType());
                 cell.setCellStyle(columnDefinition.getCellStyle());
-                try {
-                    Object value = FieldUtils.readDeclaredField(item, columnDefinition.getFieldName(), true);
-                    columnDefinition.fillData(cell, value);
-                } catch (IllegalAccessException e) {
-                    throw new RuntimeException(e);
+
+                if (columnDefinition instanceof FormulaColumnDefinition) {
+                    FormulaColumnDefinition formulaColumnDefinition = (FormulaColumnDefinition) columnDefinition;
+                    formulaColumnDefinition.dealFillData(cell, row.getRowNum() + 1);
+                } else {
+                    try {
+                        Object value = FieldUtils.readDeclaredField(item, columnDefinition.getFieldName(), true);
+                        columnDefinition.fillData(cell, value);
+                    } catch (IllegalAccessException e) {
+                        throw new RuntimeException(e);
+                    }
                 }
             }
         }
+
+        if (extraOperate != null) {
+            extraOperate.operate(workbook, sheet);
+        }
+
+        workbook.setForceFormulaRecalculation(true);
 
         // 自动列宽
         for (int i = 0; i < columnDefinitions.length; i++) {

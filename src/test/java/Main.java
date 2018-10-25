@@ -1,11 +1,5 @@
-import com.github.developframework.excel.AbstractTableDefinition;
-import com.github.developframework.excel.ExcelIO;
-import com.github.developframework.excel.ExcelType;
-import com.github.developframework.excel.TableDefinition;
-import com.github.developframework.excel.column.BasicColumnDefinition;
-import com.github.developframework.excel.column.ColumnDefinition;
-import com.github.developframework.excel.column.DateTimeColumnDefinition;
-import com.github.developframework.excel.column.NumberColumnDefinition;
+import com.github.developframework.excel.*;
+import com.github.developframework.excel.column.*;
 import com.github.developframework.mock.MockClient;
 import org.apache.commons.lang3.time.DateUtils;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -57,12 +51,17 @@ public class Main {
                         new BasicColumnDefinition(workbook, "手机号", "mobile"),
                         new DateTimeColumnDefinition(workbook, "出生日期", "birthday", "yyyy-MM-dd"),
                         new NumberColumnDefinition(workbook, "金额", "money", "￥0.00"),
+                        new FormulaColumnDefinition(workbook, "金额公式", "E{row}", "￥0.00"),
                 };
             }
         };
 
+        ExtraOperate extraOperate = (workbook, sheet) -> {
+
+        };
+
         ExcelIO.writer(ExcelType.XLSX, "E:\\test.xlsx")
-                .fillData(customers, tableDefinition)
+                .fillData(customers, tableDefinition, extraOperate)
                 .write();
     }
 

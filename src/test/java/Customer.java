@@ -16,5 +16,4 @@ public class Customer {
     private String mobile;
 
     private int money;
-
 }
