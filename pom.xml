@@ -4,7 +4,7 @@
 
     <groupId>com.github.developframework</groupId>
     <artifactId>excel-io</artifactId>
-    <version>0.1-SNAPSHOT</version>
+    <version>0.1</version>
 
     <name>Excel IO</name>
     <url>https://github.com/developframework/excel-io</url>
@@ -36,7 +36,7 @@
         <connection>scm:git:git@github.com:developframework/excel-io.git</connection>
         <developerConnection>scm:git:git@github.com:developframework/excel-io.git</developerConnection>
         <url>https://github.com/developframework/excel-io</url>
-        <tag>${project.version}</tag>
+        <tag>v0.1</tag>
     </scm>
 
     <properties>
