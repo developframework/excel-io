@@ -7,6 +7,7 @@ import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.CellType;
 
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * @author qiushui on 2018-10-10.
@@ -24,6 +25,8 @@ public abstract class ColumnDefinition {
     protected String fieldName;
 
     protected Integer maxLength;
+
+    protected Optional<ColumnValueConverter> columnValueConverter = Optional.empty();
 
     /**
      * 加边框
@@ -85,4 +88,34 @@ public abstract class ColumnDefinition {
      * @param instance
      */
     public abstract void dealReadData(Cell cell, Object instance);
+
+    /**
+     * 设置转换器
+     *
+     * @param columnValueConverter
+     * @return
+     */
+    public ColumnDefinition converter(ColumnValueConverter columnValueConverter) {
+        this.columnValueConverter = Optional.of(columnValueConverter);
+        return this;
+    }
+
+    /**
+     * 设置最大字数
+     *
+     * @param maxLength
+     * @return
+     */
+    public ColumnDefinition maxLength(int maxLength) {
+        this.maxLength = maxLength;
+        return this;
+    }
+
+    /**
+     * 列值转换器
+     */
+    public interface ColumnValueConverter {
+
+        Object convert(Object data, Object currentValue);
+    }
 }

@@ -33,11 +33,6 @@ public class NumberColumnDefinition extends BasicColumnDefinition {
         }
     }
 
-    public NumberColumnDefinition(Workbook workbook, String header, String field, String format, int maxLength) {
-        this(workbook, header, field, format);
-        this.maxLength = maxLength;
-    }
-
     @Override
     public void dealFillData(Cell cell, Object value) {
         cell.setCellValue(Double.parseDouble(value.toString()));

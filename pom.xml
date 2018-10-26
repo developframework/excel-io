@@ -43,6 +43,7 @@
         <version.lombok>1.18.2</version.lombok>
         <version.poi>3.17</version.poi>
         <version.commons-lang3>3.8.1</version.commons-lang3>
+        <version.expression>1.2.3</version.expression>
     </properties>
 
     <dependencies>
@@ -67,16 +68,33 @@
             <artifactId>commons-lang3</artifactId>
             <version>${version.commons-lang3}</version>
         </dependency>
+        <dependency>
+            <groupId>com.github.developframework</groupId>
+            <artifactId>expression</artifactId>
+            <version>${version.expression}</version>
+        </dependency>
     </dependencies>
 
+    <!--<distributionManagement>-->
+    <!--<snapshotRepository>-->
+    <!--<id>ossrh</id>-->
+    <!--<url>https://oss.sonatype.org/content/repositories/snapshots</url>-->
+    <!--</snapshotRepository>-->
+    <!--<repository>-->
+    <!--<id>ossrh</id>-->
+    <!--<url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>-->
+    <!--</repository>-->
+    <!--</distributionManagement>-->
+
+    <!-- 配置私库地址 -->
     <distributionManagement>
         <snapshotRepository>
-            <id>ossrh</id>
-            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+            <id>hclc nexus</id>
+            <url>http://nexus.hclc-tech.com:8081/repository/maven-snapshots/</url>
         </snapshotRepository>
         <repository>
-            <id>ossrh</id>
-            <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+            <id>hclc nexus</id>
+            <url>http://nexus.hclc-tech.com:8081/repository/maven-releases/</url>
         </repository>
     </distributionManagement>
 

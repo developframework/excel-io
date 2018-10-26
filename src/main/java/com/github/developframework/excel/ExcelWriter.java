@@ -2,7 +2,7 @@ package com.github.developframework.excel;
 
 import com.github.developframework.excel.column.ColumnDefinition;
 import com.github.developframework.excel.column.FormulaColumnDefinition;
-import org.apache.commons.lang3.reflect.FieldUtils;
+import com.github.developframework.expression.ExpressionUtils;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.util.IOUtils;
 
@@ -137,14 +137,16 @@ public class ExcelWriter extends ExcelProcessor {
                     FormulaColumnDefinition formulaColumnDefinition = (FormulaColumnDefinition) columnDefinition;
                     formulaColumnDefinition.dealFillData(cell, row.getRowNum() + 1);
                 } else {
-                    try {
-                        Object value = FieldUtils.readDeclaredField(item, columnDefinition.getFieldName(), true);
-                        int length = value.toString().length();
-                        columnCharMaxLength[j] = length > columnCharMaxLength[j] ? length : columnCharMaxLength[j];
-                        columnDefinition.fillData(cell, value);
-                    } catch (IllegalAccessException e) {
-                        throw new RuntimeException(e);
+                    Object value = ExpressionUtils.getValue(item, columnDefinition.getFieldName());
+                    Object convertValue;
+                    if (columnDefinition.getColumnValueConverter().isPresent()) {
+                        convertValue = columnDefinition.getColumnValueConverter().get().convert(item, value);
+                    } else {
+                        convertValue = value;
                     }
+                    int length = convertValue == null ? 0 : convertValue.toString().length();
+                    columnCharMaxLength[j] = length > columnCharMaxLength[j] ? length : columnCharMaxLength[j];
+                    columnDefinition.fillData(cell, convertValue);
                 }
             }
         }

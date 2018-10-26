@@ -21,11 +21,6 @@ public class BasicColumnDefinition extends ColumnDefinition {
         this.cellType = CellType.STRING;
     }
 
-    public BasicColumnDefinition(Workbook workbook, String header, String fieldName, int maxLength) {
-        this(workbook, header, fieldName);
-        this.maxLength = maxLength;
-    }
-
     @Override
     public void dealFillData(Cell cell, Object value) {
         cell.setCellValue(value.toString());
