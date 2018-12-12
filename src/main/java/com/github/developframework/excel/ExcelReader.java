@@ -49,6 +49,8 @@ public class ExcelReader extends ExcelProcessor {
                         continue;
                     }
                     Cell cell = row.getCell(columnIndex + j);
+                    cell.setCellStyle(columnDefinition.getCellStyle());
+                    cell.setCellType(columnDefinition.getCellType());
                     columnDefinition.readData(cell, item);
                 }
                 list.add(item);
