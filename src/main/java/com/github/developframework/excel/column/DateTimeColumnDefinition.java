@@ -18,18 +18,11 @@ import java.util.Date;
  */
 public class DateTimeColumnDefinition extends BasicColumnDefinition {
 
-    public DateTimeColumnDefinition(Workbook workbook, String header, String field) {
-        super(workbook, header, field);
+    public DateTimeColumnDefinition(Workbook workbook, String field) {
+        super(workbook, field);
         this.cellType = CellType.NUMERIC;
         DataFormat dataFormat = workbook.createDataFormat();
         this.cellStyle.setDataFormat(dataFormat.getFormat("yyyy-MM-dd HH:mm:ss"));
-    }
-
-    public DateTimeColumnDefinition(Workbook workbook, String header, String field, String pattern) {
-        super(workbook, header, field);
-        this.cellType = CellType.NUMERIC;
-        DataFormat dataFormat = workbook.createDataFormat();
-        this.cellStyle.setDataFormat(dataFormat.getFormat(pattern));
     }
 
     @Override
@@ -48,10 +41,24 @@ public class DateTimeColumnDefinition extends BasicColumnDefinition {
         Field field = FieldUtils.getField(instanceClass, fieldName, true);
         if (field.getType() == Date.class) {
             try {
-                FieldUtils.writeDeclaredField(instance, fieldName, cell.getDateCellValue(), true);
+                Date value = cell.getDateCellValue();
+                Object object = readColumnValueConverter.map(converter -> converter.convert(instance, value)).orElse(value);
+                FieldUtils.writeDeclaredField(instance, fieldName, object, true);
             } catch (IllegalAccessException e) {
                 e.printStackTrace();
             }
         }
+    }
+
+    /**
+     * 设置格式
+     *
+     * @param pattern
+     * @return
+     */
+    public DateTimeColumnDefinition pattern(String pattern) {
+        DataFormat dataFormat = workbook.createDataFormat();
+        this.cellStyle.setDataFormat(dataFormat.getFormat(pattern));
+        return this;
     }
 }

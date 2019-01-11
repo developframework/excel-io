@@ -1,6 +1,5 @@
 package com.github.developframework.excel.column;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.ss.usermodel.*;
 
 /**
@@ -8,21 +7,18 @@ import org.apache.poi.ss.usermodel.*;
  */
 public class FormulaColumnDefinition extends ColumnDefinition {
 
+    private Workbook workbook;
+
     private String formula;
 
-    public FormulaColumnDefinition(Workbook workbook, String header, String formula, String format, int maxLength) {
-        this.header = header;
+    public FormulaColumnDefinition(Workbook workbook, String formula) {
+        this.workbook = workbook;
         this.formula = formula;
         this.cellStyle = workbook.createCellStyle();
         this.cellStyle.setAlignment(HorizontalAlignment.CENTER);
         this.cellStyle.setVerticalAlignment(VerticalAlignment.CENTER);
         borderThin(cellStyle);
         cellType = CellType.FORMULA;
-        if (StringUtils.isNotBlank(format)) {
-            DataFormat dataFormat = workbook.createDataFormat();
-            this.cellStyle.setDataFormat(dataFormat.getFormat(format));
-        }
-        this.maxLength = maxLength;
     }
 
     @Override
@@ -32,6 +28,18 @@ public class FormulaColumnDefinition extends ColumnDefinition {
 
     @Override
     public void dealReadData(Cell cell, Object instance) {
+//        Object object = readColumnValueConverter.map(converter -> converter.convert(instance, value)).orElse(value);
+    }
 
+    /**
+     * 设置格式
+     *
+     * @param format
+     * @return
+     */
+    public FormulaColumnDefinition format(String format) {
+        DataFormat dataFormat = workbook.createDataFormat();
+        this.cellStyle.setDataFormat(dataFormat.getFormat(format));
+        return this;
     }
 }

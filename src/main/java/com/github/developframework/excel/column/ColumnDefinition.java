@@ -26,7 +26,9 @@ public abstract class ColumnDefinition {
 
     protected Integer maxLength;
 
-    protected Optional<ColumnValueConverter> columnValueConverter = Optional.empty();
+    protected Optional<ColumnValueConverter> readColumnValueConverter = Optional.empty();
+
+    protected Optional<ColumnValueConverter> writeColumnValueConverter = Optional.empty();
 
     /**
      * 加边框
@@ -66,7 +68,8 @@ public abstract class ColumnDefinition {
             Class<?> instanceClass = instance.getClass();
             if(Map.class.isAssignableFrom(instanceClass)) {
                 String value = cell.getStringCellValue();
-                ((Map<String, Object>) instance).put(fieldName, value);
+                Object object = readColumnValueConverter.map(converter -> converter.convert(instance, value)).orElse(value);
+                ((Map<String, Object>) instance).put(fieldName, object);
             } else if(cell.getCellTypeEnum() != CellType.BLANK){
                 dealReadData(cell, instance);
             }
@@ -90,13 +93,35 @@ public abstract class ColumnDefinition {
     public abstract void dealReadData(Cell cell, Object instance);
 
     /**
+     * 设置列名
+     *
+     * @param header
+     * @return
+     */
+    public ColumnDefinition header(String header) {
+        this.header = header;
+        return this;
+    }
+
+    /**
      * 设置转换器
      *
      * @param columnValueConverter
      * @return
      */
-    public ColumnDefinition converter(ColumnValueConverter columnValueConverter) {
-        this.columnValueConverter = Optional.of(columnValueConverter);
+    public ColumnDefinition readConverter(ColumnValueConverter columnValueConverter) {
+        this.readColumnValueConverter = Optional.of(columnValueConverter);
+        return this;
+    }
+
+    /**
+     * 设置转换器
+     *
+     * @param columnValueConverter
+     * @return
+     */
+    public ColumnDefinition writeConverter(ColumnValueConverter columnValueConverter) {
+        this.writeColumnValueConverter = Optional.of(columnValueConverter);
         return this;
     }
 

@@ -49,17 +49,30 @@ public class ExcelReader extends ExcelProcessor {
                         continue;
                     }
                     Cell cell = row.getCell(columnIndex + j);
-                    cell.setCellStyle(columnDefinition.getCellStyle());
-                    cell.setCellType(columnDefinition.getCellType());
-                    columnDefinition.readData(cell, item);
+                    if (cell != null) {
+                        cell.setCellStyle(columnDefinition.getCellStyle());
+                        cell.setCellType(columnDefinition.getCellType());
+                        columnDefinition.readData(cell, item);
+                    }
                 }
                 list.add(item);
             } catch (Exception e) {
-                System.out.println(i);
                 throw new RuntimeException(e);
             }
         }
         return new ArrayList<>(list);
+    }
+
+    /**
+     * 读取
+     *
+     * @param clazz
+     * @param tableDefinition
+     * @param <T>
+     * @return
+     */
+    public <T> List<T> read(Class<T> clazz, TableDefinition tableDefinition) {
+        return read(clazz, null, tableDefinition);
     }
 
     private Sheet getSheet(Workbook workbook, TableDefinition tableDefinition) {
@@ -83,6 +96,18 @@ public class ExcelReader extends ExcelProcessor {
         List<T> list = read(clazz, readSize, tableDefinition);
         close();
         return list;
+    }
+
+    /**
+     * 读取并关闭
+     *
+     * @param clazz
+     * @param tableDefinition
+     * @param <T>
+     * @return
+     */
+    public <T> List<T> readAndClose(Class<T> clazz, TableDefinition tableDefinition) {
+        return read(clazz, null, tableDefinition);
     }
 
     /**

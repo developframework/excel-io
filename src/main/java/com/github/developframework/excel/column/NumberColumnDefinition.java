@@ -19,13 +19,13 @@ import java.math.BigDecimal;
  */
 public class NumberColumnDefinition extends BasicColumnDefinition {
 
-    public NumberColumnDefinition(Workbook workbook, String header, String field) {
-        super(workbook, header, field);
+    public NumberColumnDefinition(Workbook workbook, String field) {
+        super(workbook, field);
         this.cellType = CellType.NUMERIC;
     }
 
-    public NumberColumnDefinition(Workbook workbook, String header, String field, String format) {
-        super(workbook, header, field);
+    public NumberColumnDefinition(Workbook workbook, String field, String format) {
+        super(workbook, field);
         this.cellType = CellType.NUMERIC;
         if (StringUtils.isNotBlank(format)) {
             DataFormat dataFormat = workbook.createDataFormat();
@@ -49,7 +49,9 @@ public class NumberColumnDefinition extends BasicColumnDefinition {
 
         if (ArrayUtils.contains(acceptClasses, field.getType())) {
             try {
-                FieldUtils.writeDeclaredField(instance, fieldName, (int) cell.getNumericCellValue(), true);
+                double value = cell.getNumericCellValue();
+                Object object = readColumnValueConverter.map(converter -> converter.convert(instance, value)).orElse(value);
+                FieldUtils.writeDeclaredField(instance, fieldName, object, true);
             } catch (IllegalAccessException e) {
                 throw new RuntimeException(e);
             }

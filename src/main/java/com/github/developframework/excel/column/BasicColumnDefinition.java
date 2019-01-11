@@ -11,8 +11,10 @@ import org.apache.poi.ss.usermodel.*;
  */
 public class BasicColumnDefinition extends ColumnDefinition {
 
-    public BasicColumnDefinition(Workbook workbook, String header, String fieldName) {
-        this.header = header;
+    protected Workbook workbook;
+
+    public BasicColumnDefinition(Workbook workbook, String fieldName) {
+        this.workbook = workbook;
         this.fieldName = fieldName;
         this.cellStyle = workbook.createCellStyle();
         this.cellStyle.setAlignment(HorizontalAlignment.CENTER);
@@ -29,8 +31,9 @@ public class BasicColumnDefinition extends ColumnDefinition {
     @Override
     public void dealReadData(Cell cell, Object instance) {
         String value = cell.getStringCellValue();
+        Object object = readColumnValueConverter.map(converter -> converter.convert(instance, value)).orElse(value);
         try {
-            FieldUtils.writeDeclaredField(instance, fieldName, value, true);
+            FieldUtils.writeDeclaredField(instance, fieldName, object, true);
         } catch (IllegalAccessException e) {
             throw new RuntimeException(e);
         }
