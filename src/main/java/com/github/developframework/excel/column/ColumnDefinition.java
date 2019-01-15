@@ -1,10 +1,11 @@
 package com.github.developframework.excel.column;
 
+import com.github.developframework.excel.styles.DefaultCellStyles;
 import lombok.Getter;
-import org.apache.poi.ss.usermodel.BorderStyle;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.CellType;
+import org.apache.poi.ss.usermodel.Workbook;
 
 import java.util.Map;
 import java.util.Optional;
@@ -15,6 +16,8 @@ import java.util.Optional;
  */
 @Getter
 public abstract class ColumnDefinition {
+
+    protected Workbook workbook;
 
     protected String header;
 
@@ -30,16 +33,9 @@ public abstract class ColumnDefinition {
 
     protected Optional<ColumnValueConverter> writeColumnValueConverter = Optional.empty();
 
-    /**
-     * 加边框
-     *
-     * @param cellStyle
-     */
-    protected void borderThin(CellStyle cellStyle) {
-        cellStyle.setBorderBottom(BorderStyle.THIN);
-        cellStyle.setBorderLeft(BorderStyle.THIN);
-        cellStyle.setBorderRight(BorderStyle.THIN);
-        cellStyle.setBorderTop(BorderStyle.THIN);
+    public ColumnDefinition(Workbook workbook) {
+        this.workbook = workbook;
+        cellStyle = DefaultCellStyles.normalCellStyle(workbook);
     }
 
     /**
@@ -137,10 +133,29 @@ public abstract class ColumnDefinition {
     }
 
     /**
+     * 处理CellStyle
+     *
+     * @param processor
+     * @return
+     */
+    public ColumnDefinition style(ColumnCellStyleProcessor processor) {
+        this.cellStyle = processor.process(cellStyle);
+        return this;
+    }
+
+    /**
      * 列值转换器
      */
     public interface ColumnValueConverter {
 
         Object convert(Object data, Object currentValue);
+    }
+
+    /**
+     * 单元格风格处理器
+     */
+    public interface ColumnCellStyleProcessor {
+
+        CellStyle process(CellStyle style);
     }
 }

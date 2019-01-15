@@ -12,6 +12,8 @@ import org.apache.poi.ss.usermodel.Workbook;
  */
 public interface TableDefinition {
 
+    String title();
+
     /**
      * 是否有表头
      */
@@ -36,6 +38,13 @@ public interface TableDefinition {
      * 起始行
      */
     int row();
+
+    /**
+     * 在标题下跳过几行
+     *
+     * @return
+     */
+    int bottomTitleSkip();
 
     /**
      * 列定义

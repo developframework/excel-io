@@ -2,8 +2,10 @@ package com.github.developframework.excel;
 
 import com.github.developframework.excel.column.ColumnDefinition;
 import com.github.developframework.excel.column.FormulaColumnDefinition;
+import com.github.developframework.excel.styles.DefaultCellStyles;
 import com.github.developframework.expression.ExpressionUtils;
 import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.util.IOUtils;
 
 import java.io.IOException;
@@ -99,11 +101,24 @@ public class ExcelWriter extends ExcelProcessor {
         int rowIndex = tableDefinition.row();
         int columnIndex;
         ColumnDefinition[] columnDefinitions = tableDefinition.columnDefinitions(workbook);
+        // 表标题
+        if (tableDefinition.title() != null) {
+            CellStyle defaultCellStyle = DefaultCellStyles.normalCellStyle(workbook);
+            // 标题行
+            Row titleRow = sheet.createRow(rowIndex++);
+            for (int i = 0; i < columnDefinitions.length; i++) {
+                titleRow.createCell(i).setCellStyle(defaultCellStyle);
+            }
+            sheet.addMergedRegion(new CellRangeAddress(0, 0, 0, columnDefinitions.length - 1));
+            titleRow.getCell(0).setCellValue(tableDefinition.title());
+        }
+        // 跳过指定行
+        rowIndex += tableDefinition.bottomTitleSkip();
         // 填充表头
         if (tableDefinition.hasHeader()) {
             Row headerRow = sheet.createRow(rowIndex++);
             columnIndex = tableDefinition.column();
-            CellStyle headerCellStyle = workbook.createCellStyle();
+            CellStyle headerCellStyle = DefaultCellStyles.normalCellStyle(workbook);
             tableDefinition.tableHeaderCellStyle(workbook, headerCellStyle);
             for (int i = 0; i < columnDefinitions.length; i++) {
                 Cell headerCell = headerRow.createCell(columnIndex + i);

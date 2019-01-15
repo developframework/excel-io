@@ -7,6 +7,10 @@ import org.apache.poi.ss.usermodel.DataFormat;
 import org.apache.poi.ss.usermodel.Workbook;
 
 import java.lang.reflect.Field;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.ZoneId;
 import java.util.Calendar;
 import java.util.Date;
 
@@ -28,7 +32,13 @@ public class DateTimeColumnDefinition extends BasicColumnDefinition {
     @Override
     public void dealFillData(Cell cell, Object value) {
         Class<?> valueClass = value.getClass();
-        if (Date.class.isAssignableFrom(valueClass)) {
+        if (LocalDate.class.isAssignableFrom(valueClass)) {
+            LocalTime localTime = LocalTime.of(0, 0, 0, 0);
+            LocalDateTime localDateTime = LocalDateTime.of((LocalDate) value, localTime);
+            cell.setCellValue(Date.from(localDateTime.atZone(ZoneId.systemDefault()).toInstant()));
+        } else if (LocalDateTime.class.isAssignableFrom(valueClass)) {
+            cell.setCellValue(Date.from(((LocalDateTime) value).atZone(ZoneId.systemDefault()).toInstant()));
+        } else if (Date.class.isAssignableFrom(valueClass)) {
             cell.setCellValue((Date) value);
         } else if (Calendar.class.isAssignableFrom(valueClass)) {
             cell.setCellValue((Calendar) value);

@@ -1,6 +1,9 @@
 package com.github.developframework.excel.column;
 
-import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellType;
+import org.apache.poi.ss.usermodel.DataFormat;
+import org.apache.poi.ss.usermodel.Workbook;
 
 /**
  * @author qiushui on 2018-10-25.
@@ -12,12 +15,8 @@ public class FormulaColumnDefinition extends ColumnDefinition {
     private String formula;
 
     public FormulaColumnDefinition(Workbook workbook, String formula) {
-        this.workbook = workbook;
+        super(workbook);
         this.formula = formula;
-        this.cellStyle = workbook.createCellStyle();
-        this.cellStyle.setAlignment(HorizontalAlignment.CENTER);
-        this.cellStyle.setVerticalAlignment(VerticalAlignment.CENTER);
-        borderThin(cellStyle);
         cellType = CellType.FORMULA;
     }
 

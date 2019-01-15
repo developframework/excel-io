@@ -1,6 +1,8 @@
 package com.github.developframework.excel;
 
-import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.Font;
+import org.apache.poi.ss.usermodel.Workbook;
 
 /**
  * 最简表格定义
@@ -9,6 +11,11 @@ import org.apache.poi.ss.usermodel.*;
  * @since 0.1
  */
 public abstract class AbstractTableDefinition implements TableDefinition {
+
+    @Override
+    public String title() {
+        return null;
+    }
 
     @Override
     public boolean hasHeader() {
@@ -36,25 +43,14 @@ public abstract class AbstractTableDefinition implements TableDefinition {
     }
 
     @Override
+    public int bottomTitleSkip() {
+        return 0;
+    }
+
+    @Override
     public void tableHeaderCellStyle(Workbook workbook, CellStyle cellStyle) {
-        cellStyle.setAlignment(HorizontalAlignment.CENTER);
-        cellStyle.setVerticalAlignment(VerticalAlignment.CENTER);
-        borderThin(cellStyle);
         Font font = workbook.createFont();
         font.setBold(true);
         cellStyle.setFont(font);
     }
-
-    /**
-     * 加边框
-     *
-     * @param cellStyle
-     */
-    protected void borderThin(CellStyle cellStyle) {
-        cellStyle.setBorderBottom(BorderStyle.THIN);
-        cellStyle.setBorderLeft(BorderStyle.THIN);
-        cellStyle.setBorderRight(BorderStyle.THIN);
-        cellStyle.setBorderTop(BorderStyle.THIN);
-    }
-
 }
