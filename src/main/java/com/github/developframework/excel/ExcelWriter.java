@@ -153,10 +153,14 @@ public class ExcelWriter extends ExcelProcessor {
                     formulaColumnDefinition.dealFillData(cell, row.getRowNum() + 1);
                 } else {
                     Object value = ExpressionUtils.getValue(item, columnDefinition.getFieldName());
-                    Object convertValue = columnDefinition.getWriteColumnValueConverter().map(converter -> converter.convert(item, value)).orElse(value);
-                    int length = convertValue == null ? 0 : convertValue.toString().length();
-                    columnCharMaxLength[j] = length > columnCharMaxLength[j] ? length : columnCharMaxLength[j];
-                    columnDefinition.fillData(cell, convertValue);
+                    if (value != null) {
+                        Object convertValue = columnDefinition.getWriteColumnValueConverter().map(converter -> converter.convert(item, value)).orElse(value);
+                        int length = convertValue.toString().length();
+                        columnCharMaxLength[j] = length > columnCharMaxLength[j] ? length : columnCharMaxLength[j];
+                        columnDefinition.fillData(cell, convertValue);
+                    } else {
+                        cell.setCellType(CellType.BLANK);
+                    }
                 }
             }
         }

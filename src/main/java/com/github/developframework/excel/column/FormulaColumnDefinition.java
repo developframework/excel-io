@@ -36,7 +36,7 @@ public class FormulaColumnDefinition extends ColumnDefinition {
      * @param format
      * @return
      */
-    public FormulaColumnDefinition format(String format) {
+    public ColumnDefinition format(String format) {
         DataFormat dataFormat = workbook.createDataFormat();
         this.cellStyle.setDataFormat(dataFormat.getFormat(format));
         return this;

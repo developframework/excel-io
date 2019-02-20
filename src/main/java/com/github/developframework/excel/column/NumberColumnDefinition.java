@@ -57,4 +57,18 @@ public class NumberColumnDefinition extends BasicColumnDefinition {
             }
         }
     }
+
+    /**
+     * 设置格式
+     *
+     * @param format
+     * @return
+     */
+    public ColumnDefinition format(String format) {
+        if (StringUtils.isNotBlank(format)) {
+            DataFormat dataFormat = workbook.createDataFormat();
+            this.cellStyle.setDataFormat(dataFormat.getFormat(format));
+        }
+        return this;
+    }
 }

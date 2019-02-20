@@ -66,7 +66,7 @@ public class DateTimeColumnDefinition extends BasicColumnDefinition {
      * @param pattern
      * @return
      */
-    public DateTimeColumnDefinition pattern(String pattern) {
+    public ColumnDefinition pattern(String pattern) {
         DataFormat dataFormat = workbook.createDataFormat();
         this.cellStyle.setDataFormat(dataFormat.getFormat(pattern));
         return this;
