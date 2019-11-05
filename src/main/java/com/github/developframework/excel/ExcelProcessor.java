@@ -10,7 +10,7 @@ public abstract class ExcelProcessor {
 
     protected Workbook workbook;
 
-    public ExcelProcessor(Workbook workbook) {
+    protected ExcelProcessor(Workbook workbook) {
         this.workbook = workbook;
     }
 }
