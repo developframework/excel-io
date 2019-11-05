@@ -109,9 +109,12 @@ public class ExcelWriter extends ExcelProcessor {
      * @param list
      * @param <ENTITY>
      */
+    @SuppressWarnings("unchecked")
     private <ENTITY> void writeInternal(TableDefinition tableDefinition, List<ENTITY> list) {
         final Sheet sheet = createSheet(tableDefinition);
         final TableLocation tableLocation = tableDefinition.tableLocation();
+        PreparedTableDataHandler preparedTableDataHandler = tableDefinition.preparedTableDataHandler();
+        final List finalList = preparedTableDataHandler == null ? list : preparedTableDataHandler.handle(list);
         final ColumnDefinition[] columnDefinitions = tableDefinition.columnDefinitions(workbook, new ColumnDefinitionBuilder(workbook));
         final int startColumnIndex = tableLocation.getColumn();
 
@@ -122,7 +125,7 @@ public class ExcelWriter extends ExcelProcessor {
         if (tableDefinition.hasColumnHeader()) {
             createTableColumnHeader(sheet, rowIndex++, startColumnIndex, columnDefinitions);
         }
-        createTableBody(sheet, rowIndex, startColumnIndex, columnDefinitions, list);
+        createTableBody(sheet, rowIndex, startColumnIndex, columnDefinitions, finalList);
     }
 
     /**

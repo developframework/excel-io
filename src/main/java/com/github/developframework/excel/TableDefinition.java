@@ -11,6 +11,15 @@ import org.apache.poi.ss.usermodel.Workbook;
 public interface TableDefinition {
 
     /**
+     * 配置表数据预处理器
+     *
+     * @return
+     */
+    default PreparedTableDataHandler preparedTableDataHandler() {
+        return null;
+    }
+
+    /**
      * 是否有标题
      *
      * @return
