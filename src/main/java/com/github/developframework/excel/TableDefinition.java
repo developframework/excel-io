@@ -1,59 +1,64 @@
 package com.github.developframework.excel;
 
-import com.github.developframework.excel.column.ColumnDefinition;
-import org.apache.poi.ss.usermodel.CellStyle;
+import com.github.developframework.excel.column.ColumnDefinitionBuilder;
 import org.apache.poi.ss.usermodel.Workbook;
 
 /**
- * 表格定义
+ * 表定义
  *
- * @author qiushui on 2018-10-09.
- * @since 0.1
+ * @author qiushui on 2019-05-18.
  */
 public interface TableDefinition {
 
-    String title();
+    /**
+     * 是否有标题
+     *
+     * @return
+     */
+    default boolean hasTitle() {
+        return false;
+    }
 
     /**
-     * 是否有表头
+     * 标题
+     *
+     * @return
      */
-    boolean hasHeader();
+    default String title() {
+        return null;
+    }
+
+    /**
+     * 是否有列头
+     */
+    default boolean hasColumnHeader() {
+        return true;
+    }
 
     /**
      * 工作表名称
      */
-    String sheetName();
+    default String sheetName() {
+        return null;
+    }
 
     /**
      * 工作表
      */
-    Integer sheet();
+    default Integer sheet() {
+        return null;
+    }
 
     /**
-     * 起始列
+     * 表格位置
      */
-    int column();
-
-    /**
-     * 起始行
-     */
-    int row();
-
-    /**
-     * 在标题下跳过几行
-     *
-     * @return
-     */
-    int bottomTitleSkip();
+    default TableLocation tableLocation() {
+        return TableLocation.of(0, 0);
+    }
 
     /**
      * 列定义
      */
-    ColumnDefinition[] columnDefinitions(Workbook workbook);
-
-    /**
-     * 设置表头单元格格式
-     */
-    void tableHeaderCellStyle(Workbook workbook, CellStyle cellStyle);
+    ColumnDefinition[] columnDefinitions(Workbook workbook, ColumnDefinitionBuilder builder);
 
 }

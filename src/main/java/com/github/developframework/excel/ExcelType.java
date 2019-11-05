@@ -19,4 +19,14 @@ public enum ExcelType {
     ExcelType(String extensionName) {
         this.extensionName = extensionName;
     }
+
+    public static ExcelType parse(String filename) {
+        if (filename.endsWith(ExcelType.XLSX.getExtensionName())) {
+            return ExcelType.XLSX;
+        } else if (filename.endsWith(ExcelType.XLS.getExtensionName())) {
+            return ExcelType.XLS;
+        } else {
+            throw new IllegalArgumentException();
+        }
+    }
 }

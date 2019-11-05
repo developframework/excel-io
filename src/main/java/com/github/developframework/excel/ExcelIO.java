@@ -4,22 +4,23 @@ import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
-import java.io.*;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
 
 /**
- * @author qiushui on 2018-10-09.
- * @since 0.1
+ * @author qiushui on 2019-05-18.
  */
 public final class ExcelIO {
 
     /**
-     * 输出到流
+     * 写出器
      *
      * @param excelType
-     * @param os
      * @return
      */
-    public static final ExcelWriter writer(ExcelType excelType, OutputStream os) {
+    public static ExcelWriter writer(ExcelType excelType) {
         Workbook workbook;
         switch (excelType) {
             case XLS:
@@ -31,22 +32,7 @@ public final class ExcelIO {
             default:
                 throw new IllegalArgumentException();
         }
-        return new ExcelWriter(workbook, os);
-    }
-
-    /**
-     * 输出到文件
-     *
-     * @param excelType
-     * @param filename
-     * @return
-     */
-    public static final ExcelWriter writer(ExcelType excelType, String filename) {
-        try {
-            return writer(excelType, new FileOutputStream(filename));
-        } catch (FileNotFoundException e) {
-            throw new RuntimeException(e);
-        }
+        return new ExcelWriter(workbook);
     }
 
     /**
@@ -56,7 +42,7 @@ public final class ExcelIO {
      * @param inputStream
      * @return
      */
-    public static final ExcelReader reader(ExcelType excelType, InputStream inputStream) {
+    public static ExcelReader reader(ExcelType excelType, InputStream inputStream) {
         Workbook workbook;
         try {
             switch (excelType) {
@@ -78,16 +64,15 @@ public final class ExcelIO {
     /**
      * 从文件读取
      *
-     * @param excelType
      * @param filename
      * @return
      */
-    public static final ExcelReader reader(ExcelType excelType, String filename) {
+    public static ExcelReader reader(String filename) {
+
         try {
-            return reader(excelType, new FileInputStream(filename));
+            return reader(ExcelType.parse(filename), new FileInputStream(filename));
         } catch (FileNotFoundException e) {
             throw new RuntimeException(e);
         }
     }
-
 }

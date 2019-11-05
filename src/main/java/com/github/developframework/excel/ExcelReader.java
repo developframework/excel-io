@@ -1,79 +1,83 @@
 package com.github.developframework.excel;
 
-import com.github.developframework.excel.column.ColumnDefinition;
+import com.github.developframework.excel.column.BlankColumnDefinition;
+import com.github.developframework.excel.column.ColumnDefinitionBuilder;
+import org.apache.commons.lang3.reflect.FieldUtils;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 
-import java.io.IOException;
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
 /**
- * Excel读取器
- *
- * @author qiushui on 2018-10-10.
- * @since 0.1
+ * @author qiushui on 2019-05-18.
  */
 public class ExcelReader extends ExcelProcessor {
 
-    public ExcelReader(Workbook workbook) {
+    protected ExcelReader(Workbook workbook) {
         super(workbook);
     }
 
     /**
-     * 读取
+     * 读取表格内容
      *
-     * @param clazz
+     * @param entityClass
      * @param tableDefinition
-     * @param readSize
+     * @param <ENTITY>
      * @return
      */
-    public <T> List<T> read(Class<T> clazz, Integer readSize, TableDefinition tableDefinition) {
-        List<T> list = new LinkedList<>();
+    public <ENTITY> List<ENTITY> read(Class<ENTITY> entityClass, TableDefinition tableDefinition) {
+        return read(entityClass, null, tableDefinition);
+    }
+
+    /**
+     * 读取表格内容
+     *
+     * @param entityClass
+     * @param readSize
+     * @param tableDefinition
+     * @param <ENTITY>
+     * @return
+     */
+    public <ENTITY> List<ENTITY> read(Class<ENTITY> entityClass, Integer readSize, TableDefinition tableDefinition) {
         Sheet sheet = getSheet(workbook, tableDefinition);
-        int lastRowNum = sheet.getLastRowNum();
-        int size = (readSize == null || readSize >= lastRowNum ? lastRowNum : readSize) - tableDefinition.row();
-        int rowIndex = tableDefinition.row() + (tableDefinition.hasHeader() ? 1 : 0);
-        int columnIndex = tableDefinition.column();
-        ColumnDefinition[] columnDefinitions = tableDefinition.columnDefinitions(workbook);
+        TableLocation tableLocation = tableDefinition.tableLocation();
+        final int totalSize = sheet.getLastRowNum() - tableLocation.getRow() - (tableDefinition.hasTitle() ? 1 : 0) - (tableDefinition.hasColumnHeader() ? 1 : 0);
+        final int startColumnIndex = tableLocation.getColumn();
+        int rowIndex = tableLocation.getRow() + (tableDefinition.hasColumnHeader() ? 1 : 0);
+        ColumnDefinition[] columnDefinitions = tableDefinition.columnDefinitions(workbook, new ColumnDefinitionBuilder(workbook));
+        List<ENTITY> list = new LinkedList<>();
+        final int size = readSize != null && readSize < totalSize ? readSize : totalSize;
         for (int i = 0; i < size; i++) {
             Row row = sheet.getRow(rowIndex + i);
             try {
-                T item = clazz.getConstructor().newInstance();
+                ENTITY entity = entityClass.getConstructor().newInstance();
                 for (int j = 0; j < columnDefinitions.length; j++) {
-                    ColumnDefinition columnDefinition = columnDefinitions[j];
-                    if(columnDefinition == null) {
+                    ColumnDefinition<?> columnDefinition = columnDefinitions[j];
+                    if (columnDefinition == null || columnDefinition instanceof BlankColumnDefinition) {
                         continue;
                     }
-                    Cell cell = row.getCell(columnIndex + j);
+                    Cell cell = row.getCell(startColumnIndex + j);
                     if (cell != null) {
-                        cell.setCellStyle(columnDefinition.getCellStyle());
-                        cell.setCellType(columnDefinition.getCellType());
-                        columnDefinition.readData(cell, item);
+                        Field field = FieldUtils.getDeclaredField(entityClass, columnDefinition.field, true);
+                        Object value = columnDefinition.readOutCell(entity, cell, field.getType());
+                        FieldUtils.writeDeclaredField(entity, columnDefinition.field, value, true);
                     }
                 }
-                list.add(item);
+                list.add(entity);
             } catch (Exception e) {
+                e.printStackTrace();
                 throw new RuntimeException(e);
             }
         }
         return new ArrayList<>(list);
     }
 
-    /**
-     * 读取
-     *
-     * @param clazz
-     * @param tableDefinition
-     * @param <T>
-     * @return
-     */
-    public <T> List<T> read(Class<T> clazz, TableDefinition tableDefinition) {
-        return read(clazz, null, tableDefinition);
-    }
+
 
     private Sheet getSheet(Workbook workbook, TableDefinition tableDefinition) {
         if (tableDefinition.sheet() != null) {
@@ -81,43 +85,7 @@ public class ExcelReader extends ExcelProcessor {
         } else if(tableDefinition.sheetName() != null) {
             return workbook.getSheet(tableDefinition.sheetName());
         } else {
-            throw new RuntimeException("sheet name and index is null");
-        }
-    }
-
-    /**
-     * 读取并关闭
-     * @param clazz
-     * @param tableDefinition
-     * @param readSize
-     * @return
-     */
-    public <T> List<T> readAndClose(Class<T> clazz, Integer readSize, TableDefinition tableDefinition) {
-        List<T> list = read(clazz, readSize, tableDefinition);
-        close();
-        return list;
-    }
-
-    /**
-     * 读取并关闭
-     *
-     * @param clazz
-     * @param tableDefinition
-     * @param <T>
-     * @return
-     */
-    public <T> List<T> readAndClose(Class<T> clazz, TableDefinition tableDefinition) {
-        return read(clazz, null, tableDefinition);
-    }
-
-    /**
-     * 关闭
-     */
-    public void close() {
-        try {
-            workbook.close();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+            return workbook.getSheetAt(0);
         }
     }
 }
