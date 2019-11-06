@@ -50,17 +50,6 @@ public class ExcelWriter extends ExcelProcessor {
     }
 
     /**
-     * 其它扩展处理
-     *
-     * @param handler
-     * @return
-     */
-    public ExcelWriter handler(ExcelWriterHandler handler) {
-        handler.handle(workbook);
-        return this;
-    }
-
-    /**
      * 写出
      */
     public void write(OutputStream outputStream) {
@@ -126,6 +115,10 @@ public class ExcelWriter extends ExcelProcessor {
             createTableColumnHeader(sheet, rowIndex++, startColumnIndex, columnDefinitions);
         }
         createTableBody(sheet, rowIndex, startColumnIndex, columnDefinitions, finalList);
+        SheetExtraHandler sheetExtraHandler = tableDefinition.sheetExtraHandler();
+        if (sheetExtraHandler != null) {
+            sheetExtraHandler.handle(workbook, sheet, rowIndex, rowIndex + list.size(), list);
+        }
     }
 
     /**
@@ -236,13 +229,5 @@ public class ExcelWriter extends ExcelProcessor {
                 sheet.setColumnWidth(startColumnIndex + i, columnDefinitions[i].columnWidth * 256);
             }
         }
-    }
-
-    /**
-     * 写入操作额外扩展处理接口
-     */
-    public interface ExcelWriterHandler {
-
-        void handle(Workbook workbook);
     }
 }
