@@ -216,7 +216,10 @@ public class ExcelWriter extends ExcelProcessor {
                     fieldValue = ExpressionUtils.getValue(entity, columnDefinition.field);
                 }
                 // 单元格风格和格式
-                cell.setCellStyle(columnDefinition.cellStyle);
+                CellStyle cellStyle = DefaultCellStyles.normalCellStyle(workbook);
+                cellStyle = columnDefinition.cellStyleProvider == null ? cellStyle : columnDefinition.cellStyleProvider.provide(workbook, cellStyle);
+                cell.setCellStyle(cellStyle);
+
                 if (columnDefinition.format != null) {
                     cell.getCellStyle().setDataFormat(workbook.createDataFormat().getFormat(columnDefinition.format));
                 }

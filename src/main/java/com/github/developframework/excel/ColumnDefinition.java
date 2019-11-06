@@ -1,9 +1,7 @@
 package com.github.developframework.excel;
 
-import com.github.developframework.excel.styles.DefaultCellStyles;
 import lombok.Getter;
 import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.Workbook;
 
@@ -19,7 +17,7 @@ public abstract class ColumnDefinition<TYPE> {
 
     protected String header;
 
-    protected CellStyle cellStyle;
+    protected CellStyleProvider cellStyleProvider;
 
     protected String field;
 
@@ -31,7 +29,6 @@ public abstract class ColumnDefinition<TYPE> {
         this.workbook = workbook;
         this.field = field;
         this.header = header;
-        this.cellStyle = DefaultCellStyles.normalCellStyle(workbook);
     }
 
     /**
@@ -119,11 +116,11 @@ public abstract class ColumnDefinition<TYPE> {
     /**
      * 设置单元格风格
      *
-     * @param cellStyle
+     * @param cellStyleProvider
      * @return
      */
-    public ColumnDefinition style(CellStyle cellStyle) {
-        this.cellStyle = cellStyle;
+    public ColumnDefinition style(CellStyleProvider cellStyleProvider) {
+        this.cellStyleProvider = cellStyleProvider;
         return this;
     }
 
