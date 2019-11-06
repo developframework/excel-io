@@ -70,11 +70,6 @@ public interface TableDefinition {
      */
     ColumnDefinition[] columnDefinitions(Workbook workbook, ColumnDefinitionBuilder builder);
 
-    /**
-     * 工作表其它处理
-     *
-     * @return
-     */
     default SheetExtraHandler sheetExtraHandler() {
         return null;
     }
