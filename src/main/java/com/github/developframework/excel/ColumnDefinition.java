@@ -1,9 +1,8 @@
 package com.github.developframework.excel;
 
+import develop.toolkit.base.struct.TwoValues;
 import lombok.Getter;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.CellType;
-import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.*;
 
 /**
  * 列定义
@@ -24,6 +23,8 @@ public abstract class ColumnDefinition<TYPE> {
     protected Integer columnWidth;
 
     protected String format;
+
+    protected TwoValues<HorizontalAlignment, VerticalAlignment> alignment;
 
     public ColumnDefinition(Workbook workbook, String field, String header) {
         this.workbook = workbook;
@@ -132,6 +133,16 @@ public abstract class ColumnDefinition<TYPE> {
      */
     public ColumnDefinition format(String format) {
         this.format = format;
+        return this;
+    }
+
+    /**
+     * @param horizontalAlignment
+     * @param verticalAlignment
+     * @return
+     */
+    public ColumnDefinition alignment(HorizontalAlignment horizontalAlignment, VerticalAlignment verticalAlignment) {
+        this.alignment = TwoValues.of(horizontalAlignment, verticalAlignment);
         return this;
     }
 }

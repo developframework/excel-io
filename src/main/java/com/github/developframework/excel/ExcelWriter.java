@@ -215,14 +215,7 @@ public class ExcelWriter extends ExcelProcessor {
                 } else {
                     fieldValue = ExpressionUtils.getValue(entity, columnDefinition.field);
                 }
-                // 单元格风格和格式
-                CellStyle cellStyle = DefaultCellStyles.normalCellStyle(workbook);
-                cellStyle = columnDefinition.cellStyleProvider == null ? cellStyle : columnDefinition.cellStyleProvider.provide(workbook, cellStyle);
-                cell.setCellStyle(cellStyle);
-
-                if (columnDefinition.format != null) {
-                    cell.getCellStyle().setDataFormat(workbook.createDataFormat().getFormat(columnDefinition.format));
-                }
+                cell.setCellStyle(configCellStyle(columnDefinition));
                 columnDefinition.writeIntoCell(entity, cell, fieldValue);
             }
         }
@@ -232,5 +225,24 @@ public class ExcelWriter extends ExcelProcessor {
                 sheet.setColumnWidth(startColumnIndex + i, columnDefinitions[i].columnWidth * 256);
             }
         }
+    }
+
+    /**
+     * 设置单元格风格
+     *
+     * @param columnDefinition
+     * @return
+     */
+    private CellStyle configCellStyle(ColumnDefinition<?> columnDefinition) {
+        CellStyle cellStyle = DefaultCellStyles.normalCellStyle(workbook);
+        cellStyle = columnDefinition.cellStyleProvider == null ? cellStyle : columnDefinition.cellStyleProvider.provide(workbook, cellStyle);
+        if (columnDefinition.format != null) {
+            cellStyle.setDataFormat(workbook.createDataFormat().getFormat(columnDefinition.format));
+        }
+        if (columnDefinition.alignment != null) {
+            cellStyle.setAlignment(columnDefinition.alignment.getFirstValue());
+            cellStyle.setVerticalAlignment(columnDefinition.alignment.getSecondValue());
+        }
+        return cellStyle;
     }
 }
