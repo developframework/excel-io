@@ -43,7 +43,7 @@
         <version.lombok>1.18.8</version.lombok>
         <version.poi>4.0.1</version.poi>
         <version.commons-lang3>3.8.1</version.commons-lang3>
-        <version.expression>1.3.2</version.expression>
+        <version.expression>1.4.0</version.expression>
         <version.develop-toolkit>1.0.2-SNAPSHOT</version.develop-toolkit>
     </properties>
 

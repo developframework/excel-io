@@ -15,6 +15,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Stream;
 
 /**
  * @author qiushui on 2019-05-18.
@@ -196,6 +197,11 @@ public class ExcelWriter extends ExcelProcessor {
      * @param <ENTITY>
      */
     private <ENTITY> void createTableBody(Sheet sheet, int rowIndex, final int startColumnIndex, ColumnDefinition[] columnDefinitions, List<ENTITY> list) {
+        // 构建列单元格风格
+        final CellStyle[] columnCellStyles = Stream
+                .of(columnDefinitions)
+                .map(this::configCellStyle)
+                .toArray(CellStyle[]::new);
         // 渲染单元格
         for (int i = 0; i < list.size(); i++) {
             ENTITY entity = list.get(i);
@@ -215,7 +221,7 @@ public class ExcelWriter extends ExcelProcessor {
                 } else {
                     fieldValue = ExpressionUtils.getValue(entity, columnDefinition.field);
                 }
-                cell.setCellStyle(configCellStyle(columnDefinition));
+                cell.setCellStyle(columnCellStyles[j]);
                 columnDefinition.writeIntoCell(entity, cell, fieldValue);
             }
         }
