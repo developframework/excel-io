@@ -2,6 +2,7 @@ package com.github.developframework.excel;
 
 import com.github.developframework.excel.column.BlankColumnDefinition;
 import com.github.developframework.excel.column.ColumnDefinitionBuilder;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.reflect.FieldUtils;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
@@ -16,6 +17,7 @@ import java.util.List;
 /**
  * @author qiushui on 2019-05-18.
  */
+@Slf4j
 public class ExcelReader extends ExcelProcessor {
 
     protected ExcelReader(Workbook workbook) {
@@ -54,10 +56,11 @@ public class ExcelReader extends ExcelProcessor {
         final int size = readSize != null && readSize < totalSize ? readSize : totalSize;
         for (int i = 0; i < size; i++) {
             Row row = sheet.getRow(rowIndex + i);
+            ColumnDefinition<?> columnDefinition = null;
             try {
                 ENTITY entity = entityClass.getConstructor().newInstance();
                 for (int j = 0; j < columnDefinitions.length; j++) {
-                    ColumnDefinition<?> columnDefinition = columnDefinitions[j];
+                    columnDefinition = columnDefinitions[j];
                     if (columnDefinition == null || columnDefinition instanceof BlankColumnDefinition) {
                         continue;
                     }
@@ -70,7 +73,8 @@ public class ExcelReader extends ExcelProcessor {
                 }
                 list.add(entity);
             } catch (Exception e) {
-                e.printStackTrace();
+                assert columnDefinition != null;
+                log.error("row {} column {}", row.getRowNum(), columnDefinition.field);
                 throw new RuntimeException(e);
             }
         }
