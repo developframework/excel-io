@@ -70,4 +70,7 @@ public interface TableDefinition {
      */
     ColumnDefinition[] columnDefinitions(Workbook workbook, ColumnDefinitionBuilder builder);
 
+    default SheetExtraHandler sheetExtraHandler() {
+        return null;
+    }
 }

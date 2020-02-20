@@ -1,11 +1,8 @@
 package com.github.developframework.excel;
 
-import com.github.developframework.excel.styles.DefaultCellStyles;
+import develop.toolkit.base.struct.TwoValues;
 import lombok.Getter;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.CellStyle;
-import org.apache.poi.ss.usermodel.CellType;
-import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.*;
 
 /**
  * 列定义
@@ -19,7 +16,7 @@ public abstract class ColumnDefinition<TYPE> {
 
     protected String header;
 
-    protected CellStyle cellStyle;
+    protected CellStyleProvider cellStyleProvider;
 
     protected String field;
 
@@ -27,11 +24,12 @@ public abstract class ColumnDefinition<TYPE> {
 
     protected String format;
 
+    protected TwoValues<HorizontalAlignment, VerticalAlignment> alignment;
+
     public ColumnDefinition(Workbook workbook, String field, String header) {
         this.workbook = workbook;
         this.field = field;
         this.header = header;
-        this.cellStyle = DefaultCellStyles.normalCellStyle(workbook);
     }
 
     /**
@@ -119,11 +117,11 @@ public abstract class ColumnDefinition<TYPE> {
     /**
      * 设置单元格风格
      *
-     * @param cellStyle
+     * @param cellStyleProvider
      * @return
      */
-    public ColumnDefinition style(CellStyle cellStyle) {
-        this.cellStyle = cellStyle;
+    public ColumnDefinition style(CellStyleProvider cellStyleProvider) {
+        this.cellStyleProvider = cellStyleProvider;
         return this;
     }
 
@@ -135,6 +133,16 @@ public abstract class ColumnDefinition<TYPE> {
      */
     public ColumnDefinition format(String format) {
         this.format = format;
+        return this;
+    }
+
+    /**
+     * @param horizontalAlignment
+     * @param verticalAlignment
+     * @return
+     */
+    public ColumnDefinition alignment(HorizontalAlignment horizontalAlignment, VerticalAlignment verticalAlignment) {
+        this.alignment = TwoValues.of(horizontalAlignment, verticalAlignment);
         return this;
     }
 }

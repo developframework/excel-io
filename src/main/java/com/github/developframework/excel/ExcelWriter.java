@@ -15,6 +15,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Stream;
 
 /**
  * @author qiushui on 2019-05-18.
@@ -46,17 +47,6 @@ public class ExcelWriter extends ExcelProcessor {
      */
     public <ENTITY> ExcelWriter load(ENTITY[] data, TableDefinition tableDefinition) {
         writeInternal(tableDefinition, Arrays.asList(data));
-        return this;
-    }
-
-    /**
-     * 其它扩展处理
-     *
-     * @param handler
-     * @return
-     */
-    public ExcelWriter handler(ExcelWriterHandler handler) {
-        handler.handle(workbook);
         return this;
     }
 
@@ -126,6 +116,10 @@ public class ExcelWriter extends ExcelProcessor {
             createTableColumnHeader(sheet, rowIndex++, startColumnIndex, columnDefinitions);
         }
         createTableBody(sheet, rowIndex, startColumnIndex, columnDefinitions, finalList);
+        SheetExtraHandler sheetExtraHandler = tableDefinition.sheetExtraHandler();
+        if (sheetExtraHandler != null) {
+            sheetExtraHandler.handle(workbook, sheet, rowIndex, rowIndex + list.size(), list);
+        }
     }
 
     /**
@@ -203,6 +197,11 @@ public class ExcelWriter extends ExcelProcessor {
      * @param <ENTITY>
      */
     private <ENTITY> void createTableBody(Sheet sheet, int rowIndex, final int startColumnIndex, ColumnDefinition[] columnDefinitions, List<ENTITY> list) {
+        // 构建列单元格风格
+        final CellStyle[] columnCellStyles = Stream
+                .of(columnDefinitions)
+                .map(this::configCellStyle)
+                .toArray(CellStyle[]::new);
         // 渲染单元格
         for (int i = 0; i < list.size(); i++) {
             ENTITY entity = list.get(i);
@@ -222,11 +221,7 @@ public class ExcelWriter extends ExcelProcessor {
                 } else {
                     fieldValue = ExpressionUtils.getValue(entity, columnDefinition.field);
                 }
-                // 单元格风格和格式
-                cell.setCellStyle(columnDefinition.cellStyle);
-                if (columnDefinition.format != null) {
-                    cell.getCellStyle().setDataFormat(workbook.createDataFormat().getFormat(columnDefinition.format));
-                }
+                cell.setCellStyle(columnCellStyles[j]);
                 columnDefinition.writeIntoCell(entity, cell, fieldValue);
             }
         }
@@ -239,10 +234,21 @@ public class ExcelWriter extends ExcelProcessor {
     }
 
     /**
-     * 写入操作额外扩展处理接口
+     * 设置单元格风格
+     *
+     * @param columnDefinition
+     * @return
      */
-    public interface ExcelWriterHandler {
-
-        void handle(Workbook workbook);
+    private CellStyle configCellStyle(ColumnDefinition<?> columnDefinition) {
+        CellStyle cellStyle = DefaultCellStyles.normalCellStyle(workbook);
+        cellStyle = columnDefinition.cellStyleProvider == null ? cellStyle : columnDefinition.cellStyleProvider.provide(workbook, cellStyle);
+        if (columnDefinition.format != null) {
+            cellStyle.setDataFormat(workbook.createDataFormat().getFormat(columnDefinition.format));
+        }
+        if (columnDefinition.alignment != null) {
+            cellStyle.setAlignment(columnDefinition.alignment.getFirstValue());
+            cellStyle.setVerticalAlignment(columnDefinition.alignment.getSecondValue());
+        }
+        return cellStyle;
     }
 }
