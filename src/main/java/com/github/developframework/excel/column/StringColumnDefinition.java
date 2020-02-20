@@ -57,6 +57,8 @@ public class StringColumnDefinition extends ColumnDefinition<String> {
             return Integer.valueOf(convertValue.toString());
         } else if (fieldClass == Long.class || fieldClass == long.class) {
             return Long.valueOf(convertValue.toString());
+        } else if (fieldClass == Boolean.class || fieldClass == boolean.class) {
+            return Boolean.valueOf(convertValue.toString());
         } else if (fieldClass == BigDecimal.class) {
             return new BigDecimal(convertValue.toString());
         } else if (fieldClass == Float.class || fieldClass == float.class) {

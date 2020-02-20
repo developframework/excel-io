@@ -48,7 +48,7 @@ public class ExcelReader extends ExcelProcessor {
     public <ENTITY> List<ENTITY> read(Class<ENTITY> entityClass, Integer readSize, TableDefinition tableDefinition) {
         Sheet sheet = getSheet(workbook, tableDefinition);
         TableLocation tableLocation = tableDefinition.tableLocation();
-        final int totalSize = sheet.getLastRowNum() - tableLocation.getRow() - (tableDefinition.hasTitle() ? 1 : 0) - (tableDefinition.hasColumnHeader() ? 1 : 0);
+        final int totalSize = sheet.getLastRowNum() + 1 - tableLocation.getRow() - (tableDefinition.hasTitle() ? 1 : 0) - (tableDefinition.hasColumnHeader() ? 1 : 0);
         final int startColumnIndex = tableLocation.getColumn();
         int rowIndex = tableLocation.getRow() + (tableDefinition.hasColumnHeader() ? 1 : 0);
         ColumnDefinition[] columnDefinitions = tableDefinition.columnDefinitions(workbook, new ColumnDefinitionBuilder(workbook));
