@@ -62,7 +62,8 @@ public class MultipleLinesColumnDefinition extends ColumnDefinition<String> {
 
     @Override
     protected String getCellValue(Cell cell) {
-        return cell.getStringCellValue();
+        String cellValue = cell.getStringCellValue();
+        return cellValue == null ? null : cellValue.trim();
     }
 
     @Override

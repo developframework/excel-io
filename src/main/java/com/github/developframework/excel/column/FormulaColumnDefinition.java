@@ -45,8 +45,10 @@ public class FormulaColumnDefinition extends ColumnDefinition<Object> {
         switch (cellValue.getCellType()) {
             case NUMERIC:
                 return cellValue.getNumberValue();
-            case STRING:
-                return cellValue.getStringValue();
+            case STRING: {
+                String cellStringValue = cell.getStringCellValue();
+                return cellStringValue == null ? null : cellStringValue.trim();
+            }
             case BOOLEAN:
                 return cellValue.getBooleanValue();
             default:

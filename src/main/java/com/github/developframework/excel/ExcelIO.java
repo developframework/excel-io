@@ -5,7 +5,6 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -44,7 +43,7 @@ public final class ExcelIO {
      */
     public static ExcelReader reader(ExcelType excelType, InputStream inputStream) {
         Workbook workbook;
-        try {
+        try (inputStream) {
             switch (excelType) {
                 case XLS:
                     workbook = new HSSFWorkbook(inputStream);
@@ -68,10 +67,9 @@ public final class ExcelIO {
      * @return
      */
     public static ExcelReader reader(String filename) {
-
         try {
             return reader(ExcelType.parse(filename), new FileInputStream(filename));
-        } catch (FileNotFoundException e) {
+        } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }

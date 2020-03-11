@@ -35,7 +35,8 @@ public class StringColumnDefinition extends ColumnDefinition<String> {
 
     @Override
     protected String getCellValue(Cell cell) {
-        return cell.getStringCellValue();
+        String cellValue = cell.getStringCellValue();
+        return cellValue == null ? null : cellValue.trim();
     }
 
     @SuppressWarnings("unchecked")
