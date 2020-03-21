@@ -41,10 +41,7 @@ public abstract class ColumnDefinition<TYPE> {
      */
     protected void writeIntoCell(Object entity, Cell cell, Object fieldValue) {
         TYPE convertValue = writeConvertValue(entity, fieldValue);
-        if (convertValue == null) {
-            cell.setCellType(CellType.BLANK);
-        } else {
-            cell.setCellType(getColumnCellType());
+        if (convertValue != null) {
             setCellValue(cell, convertValue);
         }
     }
@@ -57,7 +54,6 @@ public abstract class ColumnDefinition<TYPE> {
      * @return
      */
     protected <T> Object readOutCell(Object entity, Cell cell, Class<T> clazz) {
-        cell.setCellType(getColumnCellType());
         TYPE cellValue = getCellValue(cell);
         return readConvertValue(entity, cellValue, clazz);
     }
