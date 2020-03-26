@@ -26,10 +26,13 @@ public abstract class ColumnDefinition<TYPE> {
 
     protected TwoValues<HorizontalAlignment, VerticalAlignment> alignment;
 
+    protected DataFormatter dataFormatter;
+
     public ColumnDefinition(Workbook workbook, String field, String header) {
         this.workbook = workbook;
         this.field = field;
         this.header = header;
+        this.dataFormatter = new DataFormatter();
     }
 
     /**

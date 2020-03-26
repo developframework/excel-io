@@ -35,7 +35,7 @@ public class StringColumnDefinition extends ColumnDefinition<String> {
 
     @Override
     protected String getCellValue(Cell cell) {
-        String cellValue = cell.getStringCellValue();
+        String cellValue = dataFormatter.formatCellValue(cell);
         return cellValue == null ? null : cellValue.trim();
     }
 
