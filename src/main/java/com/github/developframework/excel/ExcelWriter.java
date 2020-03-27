@@ -15,7 +15,6 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Stream;
 
 /**
  * @author qiushui on 2019-05-18.
@@ -166,22 +165,18 @@ public class ExcelWriter extends ExcelProcessor {
      * @param startColumnIndex
      * @param columnDefinitions
      */
-    private void createTableColumnHeader(Sheet sheet, int rowIndex, final int startColumnIndex, ColumnDefinition[] columnDefinitions) {
+    private void createTableColumnHeader(Sheet sheet, int rowIndex, final int startColumnIndex, ColumnDefinition<?>[] columnDefinitions) {
         Row headerRow = sheet.createRow(rowIndex);
         CellStyle headerCellStyle = DefaultCellStyles.normalCellStyle(workbook);
         for (int i = 0; i < columnDefinitions.length; i++) {
             Cell headerCell = headerRow.createCell(startColumnIndex + i);
             ColumnDefinition<?> columnDefinition = columnDefinitions[i];
             if (columnDefinition == null) {
-                headerCell.setCellType(CellType.BLANK);
                 continue;
             }
             headerCell.setCellStyle(headerCellStyle);
             if (columnDefinition.getHeader() != null) {
-                headerCell.setCellType(CellType.STRING);
                 headerCell.setCellValue(columnDefinition.getHeader());
-            } else {
-                headerCell.setCellType(CellType.BLANK);
             }
         }
     }
@@ -196,12 +191,9 @@ public class ExcelWriter extends ExcelProcessor {
      * @param list
      * @param <ENTITY>
      */
-    private <ENTITY> void createTableBody(Sheet sheet, int rowIndex, final int startColumnIndex, ColumnDefinition[] columnDefinitions, List<ENTITY> list) {
-        // 构建列单元格风格
-        final CellStyle[] columnCellStyles = Stream
-                .of(columnDefinitions)
-                .map(this::configCellStyle)
-                .toArray(CellStyle[]::new);
+    private <ENTITY> void createTableBody(Sheet sheet, int rowIndex, final int startColumnIndex, ColumnDefinition<?>[] columnDefinitions, List<ENTITY> list) {
+        // 默认单元格风格
+        final CellStyle DEFAULT_CELL_STYLE = DefaultCellStyles.normalCellStyle(workbook);
         // 渲染单元格
         for (int i = 0; i < list.size(); i++) {
             ENTITY entity = list.get(i);
@@ -210,6 +202,7 @@ public class ExcelWriter extends ExcelProcessor {
                 Cell cell = row.createCell(startColumnIndex + j);
                 ColumnDefinition<?> columnDefinition = columnDefinitions[j];
                 if (columnDefinition == null || columnDefinition instanceof BlankColumnDefinition) {
+                    cell.setCellStyle(configCellStyle(columnDefinitions[j], DEFAULT_CELL_STYLE, null));
                     continue;
                 }
                 Object fieldValue;
@@ -221,7 +214,7 @@ public class ExcelWriter extends ExcelProcessor {
                 } else {
                     fieldValue = ExpressionUtils.getValue(entity, columnDefinition.field);
                 }
-                cell.setCellStyle(columnCellStyles[j]);
+                cell.setCellStyle(configCellStyle(columnDefinitions[j], DEFAULT_CELL_STYLE, fieldValue));
                 columnDefinition.writeIntoCell(entity, cell, fieldValue);
             }
         }
@@ -239,13 +232,18 @@ public class ExcelWriter extends ExcelProcessor {
      * @param columnDefinition
      * @return
      */
-    private CellStyle configCellStyle(ColumnDefinition<?> columnDefinition) {
-        CellStyle cellStyle = DefaultCellStyles.normalCellStyle(workbook);
-        cellStyle = columnDefinition.cellStyleProvider == null ? cellStyle : columnDefinition.cellStyleProvider.provide(workbook, cellStyle);
+    private CellStyle configCellStyle(ColumnDefinition<?> columnDefinition, CellStyle defaultCellStyle, Object value) {
+        CellStyle cellStyle = columnDefinition.cellStyleProvider == null ? defaultCellStyle : columnDefinition.cellStyleProvider.provide(workbook, defaultCellStyle, value);
         if (columnDefinition.format != null) {
+            if (cellStyle == defaultCellStyle) {
+                cellStyle = DefaultCellStyles.normalCellStyle(workbook);
+            }
             cellStyle.setDataFormat(workbook.createDataFormat().getFormat(columnDefinition.format));
         }
         if (columnDefinition.alignment != null) {
+            if (cellStyle == defaultCellStyle) {
+                cellStyle = DefaultCellStyles.normalCellStyle(workbook);
+            }
             cellStyle.setAlignment(columnDefinition.alignment.getFirstValue());
             cellStyle.setVerticalAlignment(columnDefinition.alignment.getSecondValue());
         }

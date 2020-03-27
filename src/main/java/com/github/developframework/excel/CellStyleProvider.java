@@ -5,5 +5,5 @@ import org.apache.poi.ss.usermodel.Workbook;
 
 public interface CellStyleProvider {
 
-    CellStyle provide(Workbook workbook, CellStyle cellStyle);
+    CellStyle provide(Workbook workbook, CellStyle originalStyle, Object value);
 }
