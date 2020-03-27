@@ -15,7 +15,7 @@ public interface TableDefinition {
      *
      * @return
      */
-    default PreparedTableDataHandler preparedTableDataHandler() {
+    default PreparedTableDataHandler<?, ?> preparedTableDataHandler() {
         return null;
     }
 
@@ -68,7 +68,7 @@ public interface TableDefinition {
     /**
      * 列定义
      */
-    ColumnDefinition[] columnDefinitions(Workbook workbook, ColumnDefinitionBuilder builder);
+    ColumnDefinition<?>[] columnDefinitions(Workbook workbook, ColumnDefinitionBuilder builder);
 
     default SheetExtraHandler sheetExtraHandler() {
         return null;

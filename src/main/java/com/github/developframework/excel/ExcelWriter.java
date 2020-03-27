@@ -98,13 +98,13 @@ public class ExcelWriter extends ExcelProcessor {
      * @param list
      * @param <ENTITY>
      */
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "rawtypes"})
     private <ENTITY> void writeInternal(TableDefinition tableDefinition, List<ENTITY> list) {
         final Sheet sheet = createSheet(tableDefinition);
         final TableLocation tableLocation = tableDefinition.tableLocation();
-        PreparedTableDataHandler preparedTableDataHandler = tableDefinition.preparedTableDataHandler();
-        final List finalList = preparedTableDataHandler == null ? list : preparedTableDataHandler.handle(list);
-        final ColumnDefinition[] columnDefinitions = tableDefinition.columnDefinitions(workbook, new ColumnDefinitionBuilder(workbook));
+        PreparedTableDataHandler<ENTITY, ?> preparedTableDataHandler = (PreparedTableDataHandler<ENTITY, ?>) tableDefinition.preparedTableDataHandler();
+        final List<?> finalList = preparedTableDataHandler == null ? list : preparedTableDataHandler.handle(list);
+        final ColumnDefinition<?>[] columnDefinitions = tableDefinition.columnDefinitions(workbook, new ColumnDefinitionBuilder(workbook));
         final int startColumnIndex = tableLocation.getColumn();
 
         int rowIndex = tableLocation.getRow();
