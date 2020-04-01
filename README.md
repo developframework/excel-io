@@ -35,51 +35,34 @@ public class Customer {
 #### ExcelWriter
 
 ```java
-ExcelWriter excelWriter = ExcelIO.writer(ExcelType.XLSX, "E:\\test.xlsx");
-excelWriter.fillData(customers, tableDefinition).write();
+ExcelIO
+    .writer(ExcelType.XLSX)
+	.load(customers, tableDefinition)
+    .write(outputStream);
 ```
 #### ExcelReader
 
 ```java
-ExcelReader excelReader = ExcelIO.reader(ExcelType.XLSX, "E:\\test.xlsx")；
-List<Customer> customers = excelReader.readAndClose(Customer.class, readSize, tableDefinition);
+List<Customer> customers = ExcelIO
+    .reader(ExcelType.XLSX, inputStream)
+    .read(Customer.class, tableDefinition);
 ```
 
 ### TableDefinition
 
 该接口是表格的定义类，一个定义类代表了一个数据表
 
-```java
-public interface TableDefinition {
+通过该接口可以设置表格的表头信息和表格的左上角单元格位置（工作表、行、列）。
 
-    boolean hasHeader();
-
-    String sheetName();
-
-    Integer sheet();
-
-    int column();
-
-    int row();
-
-    ColumnDefinition[] columnDefinitions(Workbook workbook);
-
-    void tableHeaderCellStyle(Workbook workbook, CellStyle cellStyle);
-
-}
-```
-
-通过该接口可以设置表格的表头信息及格式和表格的左上角单元格位置（工作表、行、列）。不过通常不直接使用该类，而使用其子类`AbstractTableDefinition` ，提供了默认的参数值。
-
-| 参数                 | 说明               | 默认值 |
-| -------------------- | ------------------ | ------ |
-| hasHeader            | 是否有表头         | true   |
-| sheetName            | 工作表名称         | null   |
-| sheet                | 工作表             | null   |
-| column               | 起始列             | 0      |
-| row                  | 起始行             | 0      |
-| columnDefinitions    | 列定义             | 未实现 |
-| tableHeaderCellStyle | 设置表头单元格格式 |        |
+| 可实现方法                                           | 说明                    | 默认值 |
+| ---------------------------------------------------- | ----------------------- | ------ |
+| hasTitle()                                           | 表格顶部是否含有标题    | false  |
+| title()                                              | 标题文本                | null   |
+| hasColumnHeader()                                    | 是否有列说明            | true   |
+| sheetName()                                          | 工作表名称              | null   |
+| tableLocation()                                      | 表格位置(起始行,起始列) | null   |
+| columnDefinitions(Workbook, ColumnDefinitionBuilder) | 列定义                  | 未实现 |
+| sheetExtraHandler()                                  | 工作表其它扩展处理      | null   |
 
 ### ColumnDefinition
 

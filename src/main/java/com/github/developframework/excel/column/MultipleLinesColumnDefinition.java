@@ -39,7 +39,7 @@ public class MultipleLinesColumnDefinition extends ColumnDefinition<String> {
     }
 
     @Override
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "rawtypes"})
     protected String writeConvertValue(Object entity, Object fieldValue) {
         if (fieldValue == null) {
             return null;
@@ -62,12 +62,12 @@ public class MultipleLinesColumnDefinition extends ColumnDefinition<String> {
 
     @Override
     protected String getCellValue(Cell cell) {
-        String cellValue = cell.getStringCellValue();
+        String cellValue = dataFormatter.formatCellValue(cell);
         return cellValue == null ? null : cellValue.trim();
     }
 
     @Override
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "rawtypes"})
     protected <T> Object readConvertValue(Object entity, String cellValue, Class<T> fieldClass) {
         if (cellValue == null) {
             return null;
