@@ -79,7 +79,7 @@ List<Customer> customers = ExcelIO
 
 内置有如下实现类：
 
-+ BasicColumnDefinition
++ StringColumnDefinition
 
 默认单元格格式为加边框，文字居中，单元格类型为STRING
 
