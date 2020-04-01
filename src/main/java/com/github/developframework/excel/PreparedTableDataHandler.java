@@ -10,5 +10,5 @@ import java.util.List;
  */
 public interface PreparedTableDataHandler<S, T> {
 
-    List<T> handle(S source);
+    List<T> handle(List<S> source);
 }
