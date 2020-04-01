@@ -10,6 +10,7 @@ import java.math.BigDecimal;
 /**
  * @author qiushui on 2019-09-02.
  */
+@SuppressWarnings("rawtypes")
 public class FormulaColumnDefinition extends ColumnDefinition<Object> {
 
     @Getter

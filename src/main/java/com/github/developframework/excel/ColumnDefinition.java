@@ -38,9 +38,9 @@ public abstract class ColumnDefinition<TYPE> {
     /**
      * 值写入单元格
      *
-     * @param entity
-     * @param cell
-     * @param fieldValue
+     * @param entity     实体
+     * @param cell       单元格
+     * @param fieldValue 字段值
      */
     protected void writeIntoCell(Object entity, Cell cell, Object fieldValue) {
         TYPE convertValue = writeConvertValue(entity, fieldValue);
@@ -52,9 +52,9 @@ public abstract class ColumnDefinition<TYPE> {
     /**
      * 读取单元格值
      *
-     * @param entity
-     * @param cell
-     * @return
+     * @param entity 实体
+     * @param cell 单元格
+     * @return 单元格值
      */
     protected <T> Object readOutCell(Object entity, Cell cell, Class<T> clazz) {
         TYPE cellValue = getCellValue(cell);
@@ -64,15 +64,16 @@ public abstract class ColumnDefinition<TYPE> {
     /**
      * 该列的CellType
      *
-     * @return
+     * @return 单元格类型
      */
+    @SuppressWarnings("unused")
     protected abstract CellType getColumnCellType();
 
     /**
      * 设置单元格值
      *
-     * @param cell
-     * @param convertValue
+     * @param cell 单元格
+     * @param convertValue 转化值
      */
     protected abstract void setCellValue(Cell cell, TYPE convertValue);
 
@@ -80,35 +81,37 @@ public abstract class ColumnDefinition<TYPE> {
     /**
      * 写入转化值
      *
-     * @param entity
-     * @param fieldValue
-     * @return
+     * @param entity 实体
+     * @param fieldValue 字段值
+     * @return 转化值
      */
     protected abstract TYPE writeConvertValue(Object entity, Object fieldValue);
 
     /**
      * 读取单元格值
      *
-     * @param cell
-     * @return
+     * @param cell 单元格
+     * @return 单元格值
      */
     protected abstract TYPE getCellValue(Cell cell);
 
     /**
      * 读取转化值
      *
-     * @param cellValue
-     * @return
+     * @param entity 实体
+     * @param cellValue 单元格值
+     * @param fieldClass 字段类型
+     * @return 字段值
      */
     protected abstract <T> Object readConvertValue(Object entity, TYPE cellValue, Class<T> fieldClass);
 
     /**
      * 列宽
      *
-     * @param columnWidth
-     * @return
+     * @param columnWidth 列宽
      */
-    public ColumnDefinition columnWidth(int columnWidth) {
+    @SuppressWarnings("unused")
+    public ColumnDefinition<TYPE> columnWidth(int columnWidth) {
         this.columnWidth = columnWidth;
         return this;
     }
@@ -116,10 +119,10 @@ public abstract class ColumnDefinition<TYPE> {
     /**
      * 设置单元格风格
      *
-     * @param cellStyleProvider
-     * @return
+     * @param cellStyleProvider 单元格风格
      */
-    public ColumnDefinition style(CellStyleProvider cellStyleProvider) {
+    @SuppressWarnings("unused")
+    public ColumnDefinition<TYPE> style(CellStyleProvider cellStyleProvider) {
         this.cellStyleProvider = cellStyleProvider;
         return this;
     }
@@ -127,20 +130,20 @@ public abstract class ColumnDefinition<TYPE> {
     /**
      * 设置格式
      *
-     * @param format
-     * @return
+     * @param format 格式
      */
-    public ColumnDefinition format(String format) {
+    @SuppressWarnings("unused")
+    public ColumnDefinition<TYPE> format(String format) {
         this.format = format;
         return this;
     }
 
     /**
-     * @param horizontalAlignment
-     * @param verticalAlignment
-     * @return
+     * @param horizontalAlignment 水平对齐
+     * @param verticalAlignment   垂直对齐
      */
-    public ColumnDefinition alignment(HorizontalAlignment horizontalAlignment, VerticalAlignment verticalAlignment) {
+    @SuppressWarnings("unused")
+    public ColumnDefinition<TYPE> alignment(HorizontalAlignment horizontalAlignment, VerticalAlignment verticalAlignment) {
         this.alignment = TwoValues.of(horizontalAlignment, verticalAlignment);
         return this;
     }

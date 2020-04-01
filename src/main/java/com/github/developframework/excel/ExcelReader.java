@@ -15,6 +15,8 @@ import java.util.LinkedList;
 import java.util.List;
 
 /**
+ * Excel读取器
+ *
  * @author qiushui on 2019-05-18.
  */
 @Slf4j
@@ -27,11 +29,12 @@ public class ExcelReader extends ExcelProcessor {
     /**
      * 读取表格内容
      *
-     * @param entityClass
-     * @param tableDefinition
-     * @param <ENTITY>
-     * @return
+     * @param entityClass     实体类型
+     * @param tableDefinition 表定义
+     * @param <ENTITY>        实体类泛型
+     * @return 实体列表
      */
+    @SuppressWarnings("unused")
     public <ENTITY> List<ENTITY> read(Class<ENTITY> entityClass, TableDefinition tableDefinition) {
         return read(entityClass, null, tableDefinition);
     }
@@ -39,11 +42,11 @@ public class ExcelReader extends ExcelProcessor {
     /**
      * 读取表格内容
      *
-     * @param entityClass
-     * @param readSize
-     * @param tableDefinition
-     * @param <ENTITY>
-     * @return
+     * @param entityClass 实体类型
+     * @param readSize 读取数量
+     * @param tableDefinition 表定义
+     * @param <ENTITY> 实体类泛型
+     * @return 实体列表
      */
     public <ENTITY> List<ENTITY> read(Class<ENTITY> entityClass, Integer readSize, TableDefinition tableDefinition) {
         Sheet sheet = getSheet(workbook, tableDefinition);

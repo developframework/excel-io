@@ -13,7 +13,6 @@ public interface TableDefinition {
     /**
      * 配置表数据预处理器
      *
-     * @return
      */
     default PreparedTableDataHandler<?, ?> preparedTableDataHandler() {
         return null;
@@ -22,7 +21,6 @@ public interface TableDefinition {
     /**
      * 是否有标题
      *
-     * @return
      */
     default boolean hasTitle() {
         return false;
@@ -31,7 +29,6 @@ public interface TableDefinition {
     /**
      * 标题
      *
-     * @return
      */
     default String title() {
         return null;

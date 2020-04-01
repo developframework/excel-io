@@ -11,13 +11,14 @@ import java.io.InputStream;
 /**
  * @author qiushui on 2019-05-18.
  */
+@SuppressWarnings("unused")
 public final class ExcelIO {
 
     /**
      * 写出器
      *
-     * @param excelType
-     * @return
+     * @param excelType Excel类型
+     * @return 写出器
      */
     public static ExcelWriter writer(ExcelType excelType) {
         Workbook workbook;
@@ -37,9 +38,9 @@ public final class ExcelIO {
     /**
      * 从流读取
      *
-     * @param excelType
-     * @param inputStream
-     * @return
+     * @param excelType   Excel类型
+     * @param inputStream 输入流
+     * @return 读取器
      */
     public static ExcelReader reader(ExcelType excelType, InputStream inputStream) {
         Workbook workbook;
@@ -63,8 +64,8 @@ public final class ExcelIO {
     /**
      * 从文件读取
      *
-     * @param filename
-     * @return
+     * @param filename 文件名
+     * @return 读取器
      */
     public static ExcelReader reader(String filename) {
         try {

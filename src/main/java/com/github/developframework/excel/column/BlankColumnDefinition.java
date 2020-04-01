@@ -25,7 +25,7 @@ public class BlankColumnDefinition extends ColumnDefinition<String> {
 
     @Override
     protected String getCellValue(Cell cell) {
-        return cell.getStringCellValue();
+        return dataFormatter.formatCellValue(cell);
     }
 
     @Override

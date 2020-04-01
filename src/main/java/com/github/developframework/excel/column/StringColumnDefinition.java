@@ -13,6 +13,7 @@ import java.math.BigDecimal;
  *
  * @author qiushui on 2019-05-18.
  */
+@SuppressWarnings("rawtypes")
 public class StringColumnDefinition extends ColumnDefinition<String> {
 
     private StringWriteColumnValueConverter writeColumnValueConverter;

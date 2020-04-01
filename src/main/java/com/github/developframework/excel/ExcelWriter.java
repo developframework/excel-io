@@ -19,6 +19,7 @@ import java.util.List;
 /**
  * @author qiushui on 2019-05-18.
  */
+@SuppressWarnings("unused")
 public class ExcelWriter extends ExcelProcessor {
 
     protected ExcelWriter(Workbook workbook) {
@@ -28,9 +29,9 @@ public class ExcelWriter extends ExcelProcessor {
     /**
      * 填充数据
      *
-     * @param data
-     * @param tableDefinition
-     * @return
+     * @param data            实体列表
+     * @param tableDefinition 表定义
+     * @return 写出器
      */
     public <ENTITY> ExcelWriter load(List<ENTITY> data, TableDefinition tableDefinition) {
         writeInternal(tableDefinition, data);
@@ -40,9 +41,9 @@ public class ExcelWriter extends ExcelProcessor {
     /**
      * 填充数据
      *
-     * @param data
-     * @param tableDefinition
-     * @return
+     * @param data 实体列表
+     * @param tableDefinition 表定义
+     * @return 写出器
      */
     public <ENTITY> ExcelWriter load(ENTITY[] data, TableDefinition tableDefinition) {
         writeInternal(tableDefinition, Arrays.asList(data));
@@ -64,7 +65,7 @@ public class ExcelWriter extends ExcelProcessor {
     /**
      * 写出到文件
      *
-     * @param filename
+     * @param filename 文件名
      */
     public void writeToFile(String filename) {
         try (OutputStream os = new FileOutputStream(filename)) {
@@ -77,7 +78,7 @@ public class ExcelWriter extends ExcelProcessor {
     /**
      * 写出到字节数组
      *
-     * @return
+     * @return 字节数组
      */
     public byte[] writeToByteArray() {
         try {
@@ -94,9 +95,9 @@ public class ExcelWriter extends ExcelProcessor {
     /**
      * 写入表格
      *
-     * @param tableDefinition
-     * @param list
-     * @param <ENTITY>
+     * @param tableDefinition 标定仪
+     * @param list 实体列表
+     * @param <ENTITY> 实体类泛型
      */
     @SuppressWarnings({"unchecked", "rawtypes"})
     private <ENTITY> void writeInternal(TableDefinition tableDefinition, List<ENTITY> list) {
@@ -124,8 +125,8 @@ public class ExcelWriter extends ExcelProcessor {
     /**
      * 创建工作表
      *
-     * @param tableDefinition
-     * @return
+     * @param tableDefinition 表定义
+     * @return 工作表
      */
     private Sheet createSheet(TableDefinition tableDefinition) {
         if (tableDefinition.sheetName() == null) {
@@ -138,11 +139,11 @@ public class ExcelWriter extends ExcelProcessor {
     /**
      * 创建表标题
      *
-     * @param sheet
-     * @param rowIndex
-     * @param startColumnIndex
-     * @param title
-     * @param columnSize
+     * @param sheet 工作表
+     * @param rowIndex 行索引
+     * @param startColumnIndex 开始列索引
+     * @param title 标题
+     * @param columnSize 列数量
      */
     private void createTableTitle(Sheet sheet, int rowIndex, final int startColumnIndex, String title, int columnSize) {
         if (StringUtils.isNotEmpty(title)) {
@@ -160,10 +161,10 @@ public class ExcelWriter extends ExcelProcessor {
     /**
      * 创建列头
      *
-     * @param sheet
-     * @param rowIndex
-     * @param startColumnIndex
-     * @param columnDefinitions
+     * @param sheet 工作表
+     * @param rowIndex 列索引
+     * @param startColumnIndex 开始列索引
+     * @param columnDefinitions 列定义数组
      */
     private void createTableColumnHeader(Sheet sheet, int rowIndex, final int startColumnIndex, ColumnDefinition<?>[] columnDefinitions) {
         Row headerRow = sheet.createRow(rowIndex);
@@ -184,12 +185,12 @@ public class ExcelWriter extends ExcelProcessor {
     /**
      * 创建表内容
      *
-     * @param sheet
-     * @param rowIndex
-     * @param startColumnIndex
-     * @param columnDefinitions
-     * @param list
-     * @param <ENTITY>
+     * @param sheet 工作表
+     * @param rowIndex 行索引
+     * @param startColumnIndex 开始列索引
+     * @param columnDefinitions 列定义数组
+     * @param list 实体列表
+     * @param <ENTITY> 实体类泛型
      */
     private <ENTITY> void createTableBody(Sheet sheet, int rowIndex, final int startColumnIndex, ColumnDefinition<?>[] columnDefinitions, List<ENTITY> list) {
         // 默认单元格风格
@@ -229,8 +230,8 @@ public class ExcelWriter extends ExcelProcessor {
     /**
      * 设置单元格风格
      *
-     * @param columnDefinition
-     * @return
+     * @param columnDefinition 列定义
+     * @return 单元格风格
      */
     private CellStyle configCellStyle(ColumnDefinition<?> columnDefinition, CellStyle defaultCellStyle, Object value) {
         CellStyle cellStyle = columnDefinition.cellStyleProvider == null ? defaultCellStyle : columnDefinition.cellStyleProvider.provide(workbook, defaultCellStyle, value);

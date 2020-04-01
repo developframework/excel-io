@@ -11,6 +11,7 @@ import java.math.BigDecimal;
 /**
  * @author qiushui on 2019-05-19.
  */
+@SuppressWarnings("rawtypes")
 public class NumericColumnDefinition extends ColumnDefinition<Double> {
 
     private NumericWriteColumnValueConverter writeColumnValueConverter;

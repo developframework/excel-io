@@ -16,15 +16,15 @@ public class ColumnDefinitionBuilder {
         this.workbook = workbook;
     }
 
-    public ColumnDefinition[] columnDefinitions(ColumnDefinition... columnDefinitions) {
+    public ColumnDefinition<?>[] columnDefinitions(ColumnDefinition<?>... columnDefinitions) {
         return columnDefinitions;
     }
 
     /**
      * 空列
      *
-     * @param header
-     * @return
+     * @param header 列名
+     * @return 空列定义
      */
     public BlankColumnDefinition blank(String header) {
         return new BlankColumnDefinition(header);
@@ -37,9 +37,9 @@ public class ColumnDefinitionBuilder {
     /**
      * 字符串列
      *
-     * @param field
-     * @param header
-     * @return
+     * @param field  字段
+     * @param header 列名
+     * @return 字符串定义
      */
     public StringColumnDefinition string(String field, String header) {
         return new StringColumnDefinition(workbook, field, header);
@@ -52,9 +52,9 @@ public class ColumnDefinitionBuilder {
     /**
      * 多行值列
      *
-     * @param field
-     * @param header
-     * @return
+     * @param field 字段
+     * @param header 列名
+     * @return 多行值列定义
      */
     public MultipleLinesColumnDefinition multipleLines(String field, String header) {
         return new MultipleLinesColumnDefinition(workbook, field, header);
@@ -65,11 +65,11 @@ public class ColumnDefinitionBuilder {
     }
 
     /**
-     * 数字列
+     * 数值列
      *
-     * @param field
-     * @param header
-     * @return
+     * @param field 字段
+     * @param header 列名
+     * @return 数值列定义
      */
     public NumericColumnDefinition numeric(String field, String header) {
         return new NumericColumnDefinition(workbook, field, header);
@@ -82,9 +82,9 @@ public class ColumnDefinitionBuilder {
     /**
      * 公式列
      *
-     * @param formula
-     * @param header
-     * @return
+     * @param formula 公式字符串
+     * @param header 列名
+     * @return 公式列定义
      */
     public FormulaColumnDefinition formula(String formula, String header) {
         return new FormulaColumnDefinition(workbook, formula, header);
