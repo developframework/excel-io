@@ -19,12 +19,11 @@ public class Customer {
 
     private String name;
 
-    private Date birthday;
+    private LocalDate buyDate;
 
-    private String mobile;
+    private String[] tickets;
 
-    private int money;
-
+    private int cost;
 }
 ```
 
@@ -68,15 +67,6 @@ List<Customer> customers = ExcelIO
 
 该抽象类是表格的列定义类，一个定义类代表了表中的某一列，指代了一个字段
 
-包含参数：
-
-| 参数      | 说明                                                       |
-| --------- | ---------------------------------------------------------- |
-| header    | 表头列名，如果TableDefinition中hasHeader = false，该值无效 |
-| cellStyle | 单元格风格                                                 |
-| cellType  | 单元格类型                                                 |
-| fieldName | 数据引用字段名称                                           |
-
 内置有如下实现类：
 
 + StringColumnDefinition
@@ -101,7 +91,7 @@ List<Customer> customers = ExcelIO
 
 ## 导入数据到Excel
 
-使用`excel-io`导入customer数据，表格左上角位置在第2行的第1列（从0计数）
+使用`excel-io`导入customer数据
 
 ```java
 Customer[] customers = new Customer[100];
@@ -134,43 +124,21 @@ ExcelIO.writer(ExcelType.XLSX, "E:\\test.xlsx")
         .write();
 ```
 
-
-
-![](doc-images/image1.png)
-
 ## 从Excel导出数据
 
 使用`excel-io`导出customer数据
 
 ```java
-List<Customer> list =  ExcelIO.reader(ExcelType.XLSX, "E:\\test.xlsx")
-        .readAndClose(Customer.class, null, new AbstractTableDefinition() {
-
-            @Override
-            public int row() {
-                return 2;
-            }
-
-            @Override
-            public int column() {
-                return 1;
-            }
-
-            @Override
-            public Integer sheet() {
-                return 0;
-            }
-
-            @Override
-            public ColumnDefinition[] columnDefinitions(Workbook workbook) {
-
-                return new ColumnDefinition[] {
-                        new BasicColumnDefinition(workbook, "姓名", "name"),
-                        new BasicColumnDefinition(workbook, "手机号", "mobile"),
-                        new DateTimeColumnDefinition(workbook, "出生日期", "birthday", "yyyy-MM-dd"),
-                        new NumberColumnDefinition(workbook, "金额", "money", "￥0.00"),
-                };
-            }
-        });
+List<Customer> customers = new LinkedList<>();
+// 准备数据略
+ExcelIO
+        .writer(ExcelType.XLSX)
+        .load(customers, (workbook, builder) -> builder.columnDefinitions(
+                builder.string("name", "姓名"),
+                builder.string("buyDate", "购买日期"),
+                builder.multipleLines("tickets", "所购门票"),
+                builder.numeric("cost", "花费").format("￥0.00")
+        ))
+        .write(outputStream);
 ```
-
+![](doc-images/image1.png)
