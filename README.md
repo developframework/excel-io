@@ -81,15 +81,23 @@ List<Customer> customers = ExcelIO
 
 + StringColumnDefinition
 
-默认单元格格式为加边框，文字居中，单元格类型为STRING
+  文本列，默认单元格格式为加边框，文字居中，单元格类型为STRING
 
-+ DateTimeColumnDefinition
++ FormulaColumnDefinition
 
-默认单元格格式为加边框，文字居中，单元格类型为NUMERIC
+  公式列，默认单元格格式为加边框，文字居中，单元格类型为FORMULA
 
-- NumberColumnDefinition
++ NumericColumnDefinition
 
-默认单元格格式为加边框，文字居中，单元格类型为NUMERIC
+  数值列，默认单元格格式为加边框，文字居中，单元格类型为NUMERIC
+
++ BlankColumnDefintion
+
+  空白列，默认单元格格式为加边框，文字居中，单元格类型为BLANK
+
++ MultipleLinesColumnDefinition
+
+  多行文本列，默认单元格格式为加边框，文字居中，单元格类型为STRING
 
 ## 导入数据到Excel
 

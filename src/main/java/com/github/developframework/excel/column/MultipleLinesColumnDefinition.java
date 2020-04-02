@@ -5,6 +5,7 @@ import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.Workbook;
 
+import java.lang.reflect.Array;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
@@ -77,13 +78,19 @@ public class MultipleLinesColumnDefinition extends ColumnDefinition<String> {
             stream = stream.map(readMappingFunction);
         }
         if (fieldClass.isArray()) {
-            return stream.toArray(Object[]::new);
+            List list = (List) stream.collect(Collectors.toList());
+            Object[] array = (Object[]) Array.newInstance(fieldClass.getComponentType(), list.size());
+            for (int i = 0; i < list.size(); i++) {
+                array[i] = list.get(i);
+            }
+            return array;
         } else if (List.class.isAssignableFrom(fieldClass)) {
             return stream.collect(Collectors.toList());
         } else if (Set.class.isAssignableFrom(fieldClass)) {
             return stream.collect(Collectors.toSet());
+        } else {
+            return null;
         }
-        return null;
     }
 
     public MultipleLinesColumnDefinition writeMap(Function<?, String> writeMappingFunction) {

@@ -7,6 +7,10 @@ import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.Workbook;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 
 /**
  * 字符串列
@@ -67,6 +71,12 @@ public class StringColumnDefinition extends ColumnDefinition<String> {
             return Float.valueOf(convertValue.toString());
         } else if (fieldClass == Double.class || fieldClass == double.class) {
             return Double.valueOf(convertValue.toString());
+        } else if (fieldClass == LocalDateTime.class) {
+            return LocalDateTime.parse(convertValue.toString(), format == null ? DateTimeFormatter.ISO_LOCAL_DATE_TIME : DateTimeFormatter.ofPattern(format));
+        } else if (fieldClass == LocalDate.class) {
+            return LocalDate.parse(convertValue.toString(), format == null ? DateTimeFormatter.ISO_LOCAL_DATE : DateTimeFormatter.ofPattern(format));
+        } else if (fieldClass == LocalTime.class) {
+            return LocalTime.parse(convertValue.toString(), format == null ? DateTimeFormatter.ISO_LOCAL_TIME : DateTimeFormatter.ofPattern(format));
         } else {
             throw new IllegalArgumentException("can not convert from \"java.lang.String\" to \"" + fieldClass.getName() + "\"");
         }
