@@ -89,44 +89,9 @@ List<Customer> customers = ExcelIO
 
   多行文本列，默认单元格格式为加边框，文字居中，单元格类型为STRING
 
-## 导入数据到Excel
+## 写出数据到Excel
 
 使用`excel-io`导入customer数据
-
-```java
-Customer[] customers = new Customer[100];
-TableDefinition tableDefinition = new AbstractTableDefinition() {
-
-    @Override
-    public int row() {
-        return 2;
-    }
-
-    @Override
-    public int column() {
-        return 1;
-    }
-
-    @Override
-    public ColumnDefinition[] columnDefinitions(Workbook workbook) {
-		// 申明列
-        return new ColumnDefinition[] {
-                new BasicColumnDefinition(workbook, "姓名", "name"),
-                new BasicColumnDefinition(workbook, "手机号", "mobile"),
-                new DateTimeColumnDefinition(workbook, "出生日期", "birthday", "yyyy-MM-dd"),
-                new NumberColumnDefinition(workbook, "金额", "money", "￥0.00")
-        };
-    }
-};
-
-ExcelIO.writer(ExcelType.XLSX, "E:\\test.xlsx")
-        .fillData(customers, tableDefinition)
-        .write();
-```
-
-## 从Excel导出数据
-
-使用`excel-io`导出customer数据
 
 ```java
 List<Customer> customers = new LinkedList<>();
@@ -140,5 +105,20 @@ ExcelIO
                 builder.numeric("cost", "花费").format("￥0.00")
         ))
         .write(outputStream);
+```
+
+## 从Excel读取数据
+
+使用`excel-io`导出customer数据
+
+```java
+List<Customer> customers = ExcelIO
+        .reader(inputStream)
+        .read(Customer.class, (workbook, builder) -> builder.columnDefinitions(
+                builder.string("name", "姓名"),
+                builder.string("buyDate", "购买日期"),
+                builder.multipleLines("tickets", "所购门票"),
+                builder.numeric("cost", "花费").format("￥0.00")
+        ));
 ```
 ![](doc-images/image1.png)
