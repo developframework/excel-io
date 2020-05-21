@@ -44,7 +44,7 @@
         <version.poi>4.1.0</version.poi>
         <version.commons-lang3>3.9</version.commons-lang3>
         <version.expression>1.5.0</version.expression>
-        <version.develop-toolkit>1.0.2-SNAPSHOT</version.develop-toolkit>
+        <version.develop-toolkit>1.0.2</version.develop-toolkit>
     </properties>
 
     <dependencies>
