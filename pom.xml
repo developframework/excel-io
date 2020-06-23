@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.github.developframework</groupId>
@@ -44,7 +45,7 @@
         <version.poi>4.1.0</version.poi>
         <version.commons-lang3>3.9</version.commons-lang3>
         <version.expression>1.5.0</version.expression>
-        <version.develop-toolkit>1.0.2</version.develop-toolkit>
+        <version.develop-toolkit>1.0.3</version.develop-toolkit>
     </properties>
 
     <dependencies>
@@ -81,34 +82,10 @@
         </dependency>
     </dependencies>
 
-    <!--<distributionManagement>-->
-    <!--<snapshotRepository>-->
-    <!--<id>ossrh</id>-->
-    <!--<url>https://oss.sonatype.org/content/repositories/snapshots</url>-->
-    <!--</snapshotRepository>-->
-    <!--<repository>-->
-    <!--<id>ossrh</id>-->
-    <!--<url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>-->
-    <!--</repository>-->
-    <!--</distributionManagement>-->
-
-    <!-- 配置私库地址 -->
-    <distributionManagement>
-        <snapshotRepository>
-            <id>hclc nexus</id>
-            <url>http://nexus.hclc-tech.com:8081/repository/maven-snapshots/</url>
-        </snapshotRepository>
-        <repository>
-            <id>hclc nexus</id>
-            <url>http://nexus.hclc-tech.com:8081/repository/maven-releases/</url>
-        </repository>
-    </distributionManagement>
-
     <build>
         <plugins>
             <plugin>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.8.1</version>
                 <configuration>
                     <annotationProcessorPaths>
                         <path>
@@ -121,7 +98,6 @@
             </plugin>
             <plugin>
                 <artifactId>maven-source-plugin</artifactId>
-                <version>3.0.1</version>
                 <executions>
                     <execution>
                         <id>attach-sources</id>
@@ -169,6 +145,16 @@
                     </plugin>
                 </plugins>
             </build>
+            <distributionManagement>
+                <snapshotRepository>
+                    <id>ossrh</id>
+                    <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+                </snapshotRepository>
+                <repository>
+                    <id>ossrh</id>
+                    <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+                </repository>
+            </distributionManagement>
         </profile>
     </profiles>
 </project>
