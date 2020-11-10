@@ -2,6 +2,8 @@ package com.github.developframework.excel;
 
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.WorkbookFactory;
+import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import java.io.FileInputStream;
@@ -27,7 +29,7 @@ public final class ExcelIO {
                 workbook = new HSSFWorkbook();
                 break;
             case XLSX:
-                workbook = new XSSFWorkbook();
+                workbook = new SXSSFWorkbook();
                 break;
             default:
                 throw new IllegalArgumentException();
@@ -50,7 +52,7 @@ public final class ExcelIO {
                     workbook = new HSSFWorkbook(inputStream);
                     break;
                 case XLSX:
-                    workbook = new XSSFWorkbook(inputStream);
+                    workbook = new SXSSFWorkbook(new XSSFWorkbook(inputStream));
                     break;
                 default:
                     throw new IllegalArgumentException();
@@ -70,6 +72,38 @@ public final class ExcelIO {
     public static ExcelReader reader(String filename) {
         try {
             return reader(ExcelType.parse(filename), new FileInputStream(filename));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * 从流读取(带密码)
+     *
+     * @param inputStream 输入流
+     * @param password    密码
+     * @return 读取器
+     */
+    public static ExcelReader readerWithPassword(InputStream inputStream, String password) {
+        Workbook workbook;
+        try (inputStream) {
+            workbook = WorkbookFactory.create(inputStream, password);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        return new ExcelReader(workbook);
+    }
+
+    /**
+     * 从文件读取(带密码)
+     *
+     * @param filename 文件名
+     * @param password 密码
+     * @return 读取器
+     */
+    public static ExcelReader readerWithPassword(String filename, String password) {
+        try {
+            return readerWithPassword(new FileInputStream(filename), password);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
