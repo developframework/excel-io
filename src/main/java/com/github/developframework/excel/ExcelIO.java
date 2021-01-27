@@ -52,7 +52,7 @@ public final class ExcelIO {
                     workbook = new HSSFWorkbook(inputStream);
                     break;
                 case XLSX:
-                    workbook = new SXSSFWorkbook(new XSSFWorkbook(inputStream));
+                    workbook = new XSSFWorkbook(inputStream);
                     break;
                 default:
                     throw new IllegalArgumentException();
