@@ -40,10 +40,10 @@
     </scm>
 
     <properties>
-        <version.lombok>1.18.12</version.lombok>
+        <version.lombok>1.18.20</version.lombok>
         <version.poi>4.1.0</version.poi>
         <version.commons-lang3>3.9</version.commons-lang3>
-        <version.expression>1.5.0</version.expression>
+        <version.expression>1.5.1</version.expression>
         <version.develop-toolkit>1.0.3</version.develop-toolkit>
     </properties>
 
@@ -80,6 +80,18 @@
             <version>${version.develop-toolkit}</version>
         </dependency>
     </dependencies>
+
+    <!-- 配置私库地址 -->
+    <distributionManagement>
+        <snapshotRepository>
+            <id>hclc aliyun nexus</id>
+            <url>http://nexus.hclcaliyun.com:8082/repository/maven-snapshots/</url>
+        </snapshotRepository>
+        <repository>
+            <id>hclc aliyun nexus</id>
+            <url>http://nexus.hclcaliyun.com:8082/repository/maven-releases/</url>
+        </repository>
+    </distributionManagement>
 
     <build>
         <plugins>

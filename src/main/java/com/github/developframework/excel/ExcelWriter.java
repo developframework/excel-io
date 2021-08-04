@@ -8,6 +8,7 @@ import com.github.developframework.expression.ExpressionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.CellRangeAddress;
+import org.apache.poi.xssf.streaming.SXSSFSheet;
 
 import java.io.ByteArrayOutputStream;
 import java.io.FileOutputStream;
@@ -41,7 +42,7 @@ public class ExcelWriter extends ExcelProcessor {
     /**
      * 填充数据
      *
-     * @param data 实体列表
+     * @param data            实体列表
      * @param tableDefinition 表定义
      * @return 写出器
      */
@@ -96,12 +97,13 @@ public class ExcelWriter extends ExcelProcessor {
      * 写入表格
      *
      * @param tableDefinition 标定仪
-     * @param list 实体列表
-     * @param <ENTITY> 实体类泛型
+     * @param list            实体列表
+     * @param <ENTITY>        实体类泛型
      */
     @SuppressWarnings({"unchecked", "rawtypes"})
     private <ENTITY> void writeInternal(TableDefinition tableDefinition, List<ENTITY> list) {
         final Sheet sheet = createSheet(tableDefinition);
+        ((SXSSFSheet) sheet).setRandomAccessWindowSize(-1);
         final TableLocation tableLocation = tableDefinition.tableLocation();
         PreparedTableDataHandler<ENTITY, ?> preparedTableDataHandler = (PreparedTableDataHandler<ENTITY, ?>) tableDefinition.preparedTableDataHandler();
         final List<?> finalList = preparedTableDataHandler == null ? list : preparedTableDataHandler.handle(list);
@@ -139,11 +141,11 @@ public class ExcelWriter extends ExcelProcessor {
     /**
      * 创建表标题
      *
-     * @param sheet 工作表
-     * @param rowIndex 行索引
+     * @param sheet            工作表
+     * @param rowIndex         行索引
      * @param startColumnIndex 开始列索引
-     * @param title 标题
-     * @param columnSize 列数量
+     * @param title            标题
+     * @param columnSize       列数量
      */
     private void createTableTitle(Sheet sheet, int rowIndex, final int startColumnIndex, String title, int columnSize) {
         if (StringUtils.isNotEmpty(title)) {
@@ -161,9 +163,9 @@ public class ExcelWriter extends ExcelProcessor {
     /**
      * 创建列头
      *
-     * @param sheet 工作表
-     * @param rowIndex 列索引
-     * @param startColumnIndex 开始列索引
+     * @param sheet             工作表
+     * @param rowIndex          列索引
+     * @param startColumnIndex  开始列索引
      * @param columnDefinitions 列定义数组
      */
     private void createTableColumnHeader(Sheet sheet, int rowIndex, final int startColumnIndex, ColumnDefinition<?>[] columnDefinitions) {
@@ -185,12 +187,12 @@ public class ExcelWriter extends ExcelProcessor {
     /**
      * 创建表内容
      *
-     * @param sheet 工作表
-     * @param rowIndex 行索引
-     * @param startColumnIndex 开始列索引
+     * @param sheet             工作表
+     * @param rowIndex          行索引
+     * @param startColumnIndex  开始列索引
      * @param columnDefinitions 列定义数组
-     * @param list 实体列表
-     * @param <ENTITY> 实体类泛型
+     * @param list              实体列表
+     * @param <ENTITY>          实体类泛型
      */
     private <ENTITY> void createTableBody(Sheet sheet, int rowIndex, final int startColumnIndex, ColumnDefinition<?>[] columnDefinitions, List<ENTITY> list) {
         // 默认单元格风格
