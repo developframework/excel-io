@@ -8,9 +8,9 @@ import lombok.Getter;
 @Getter
 public class TableLocation {
 
-    private int row;
+    private final int row;
 
-    private int column;
+    private final int column;
 
     private TableLocation(int row, int column) {
         this.row = row;

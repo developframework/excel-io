@@ -10,7 +10,7 @@ import org.apache.poi.ss.usermodel.Workbook;
  */
 public class ColumnDefinitionBuilder {
 
-    private Workbook workbook;
+    private final Workbook workbook;
 
     public ColumnDefinitionBuilder(Workbook workbook) {
         this.workbook = workbook;

@@ -9,6 +9,7 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UncheckedIOException;
 
 /**
  * @author qiushui on 2019-05-18.
@@ -52,13 +53,13 @@ public final class ExcelIO {
                     workbook = new HSSFWorkbook(inputStream);
                     break;
                 case XLSX:
-                    workbook = new SXSSFWorkbook(new XSSFWorkbook(inputStream));
+                    workbook = new XSSFWorkbook(inputStream);
                     break;
                 default:
                     throw new IllegalArgumentException();
             }
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new UncheckedIOException(e);
         }
         return new ExcelReader(workbook);
     }
@@ -73,7 +74,7 @@ public final class ExcelIO {
         try {
             return reader(ExcelType.parse(filename), new FileInputStream(filename));
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new UncheckedIOException(e);
         }
     }
 
@@ -85,13 +86,11 @@ public final class ExcelIO {
      * @return 读取器
      */
     public static ExcelReader readerWithPassword(InputStream inputStream, String password) {
-        Workbook workbook;
         try (inputStream) {
-            workbook = WorkbookFactory.create(inputStream, password);
+            return new ExcelReader(WorkbookFactory.create(inputStream, password));
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new UncheckedIOException(e);
         }
-        return new ExcelReader(workbook);
     }
 
     /**
@@ -105,7 +104,7 @@ public final class ExcelIO {
         try {
             return readerWithPassword(new FileInputStream(filename), password);
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new UncheckedIOException(e);
         }
     }
 }
