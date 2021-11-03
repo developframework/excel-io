@@ -1,22 +1,16 @@
 package com.github.developframework.excel.column;
 
 import com.github.developframework.excel.ColumnDefinition;
-import com.github.developframework.excel.ColumnValueConverter;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.Workbook;
 
-import java.math.BigDecimal;
+import java.util.function.BiFunction;
 
 /**
  * @author qiushui on 2019-05-19.
  */
-@SuppressWarnings("rawtypes")
-public class NumericColumnDefinition extends ColumnDefinition<Double> {
-
-    private NumericWriteColumnValueConverter writeColumnValueConverter;
-
-    private NumericReadColumnValueConverter readColumnValueConverter;
+public class NumericColumnDefinition<FIELD> extends ColumnDefinition<Number, FIELD> {
 
     public NumericColumnDefinition(Workbook workbook, String field, String header) {
         super(workbook, field, header);
@@ -28,83 +22,32 @@ public class NumericColumnDefinition extends ColumnDefinition<Double> {
     }
 
     @Override
-    protected void setCellValue(Cell cell, Double convertValue) {
-        cell.setCellValue(convertValue);
+    protected void setCellValue(Cell cell, Number convertValue) {
+        cell.setCellValue(convertValue.doubleValue());
     }
 
     @Override
-    protected Double getCellValue(Cell cell) {
+    protected Number getCellValue(Cell cell) {
         return cell.getNumericCellValue();
     }
 
-    @SuppressWarnings("unchecked")
     @Override
-    protected Double writeConvertValue(Object entity, Object fieldValue) {
-        if (writeColumnValueConverter != null) {
-            fieldValue = writeColumnValueConverter.convert(entity, fieldValue);
+    protected Number writeConvertValue(Object entity, FIELD fieldValue) {
+        if (writeConvertFunction != null) {
+            return writeConvertFunction.apply(entity, fieldValue);
         }
-        if (fieldValue == null) {
-            return null;
-        } else if (fieldValue instanceof Integer) {
-            return ((Integer) fieldValue).doubleValue();
-        } else if (fieldValue instanceof Long) {
-            return ((Long) fieldValue).doubleValue();
-        } else if (fieldValue instanceof BigDecimal) {
-            return ((BigDecimal) fieldValue).doubleValue();
-        } else if (fieldValue instanceof Float) {
-            return ((Float) fieldValue).doubleValue();
-        } else if (fieldValue instanceof Double) {
-            return (Double) fieldValue;
-        } else {
-            throw new IllegalArgumentException("must be Number Instance");
-        }
+        return (Number) fieldValue;
     }
 
-    @SuppressWarnings("unchecked")
-    @Override
-    protected <T> Object readConvertValue(Object entity, Double cellValue, Class<T> fieldClass) {
-        Number convertValue;
-        if (readColumnValueConverter != null) {
-            convertValue = (Number) readColumnValueConverter.convert(entity, cellValue);
-        } else {
-            convertValue = cellValue;
-        }
-        if (convertValue == null) {
-            return null;
-        } else if (fieldClass == convertValue.getClass()) {
-            return convertValue;
-        } else if (fieldClass == String.class) {
-            return convertValue.toString();
-        } else if (fieldClass == Integer.class || fieldClass == int.class) {
-            return convertValue.intValue();
-        } else if (fieldClass == Long.class || fieldClass == long.class) {
-            return convertValue.longValue();
-        } else if (fieldClass == BigDecimal.class) {
-            return new BigDecimal(convertValue.toString());
-        } else if (fieldClass == Float.class || fieldClass == float.class) {
-            return convertValue.floatValue();
-        } else if (fieldClass == Double.class || fieldClass == double.class) {
-            return convertValue.doubleValue();
-        } else {
-            throw new IllegalArgumentException("can not convert from \"java.lang.Double\" to \"" + fieldClass.getName() + "\"");
-        }
-    }
-
-    public <ENTITY, SOURCE> NumericColumnDefinition valueToDouble(Class<SOURCE> clazz, NumericWriteColumnValueConverter<ENTITY, SOURCE> writeColumnValueConverter) {
-        this.writeColumnValueConverter = writeColumnValueConverter;
+    @SuppressWarnings({"unchecked", "unused"})
+    public <ENTITY> NumericColumnDefinition<FIELD> valueToNumber(BiFunction<ENTITY, FIELD, Number> function) {
+        this.writeConvertFunction = (BiFunction<Object, FIELD, Number>) function;
         return this;
     }
 
-    public <ENTITY, TARGET extends Number> NumericColumnDefinition doubleToValue(Class<TARGET> clazz, NumericReadColumnValueConverter<ENTITY, TARGET> readColumnValueConverter) {
-        this.readColumnValueConverter = readColumnValueConverter;
+    @SuppressWarnings({"unchecked", "unused"})
+    public <ENTITY> NumericColumnDefinition<FIELD> numberToValue(BiFunction<ENTITY, Number, FIELD> function) {
+        this.readConvertFunction = (BiFunction<Object, Number, FIELD>) function;
         return this;
-    }
-
-    public interface NumericWriteColumnValueConverter<ENTITY, SOURCE> extends ColumnValueConverter<ENTITY, SOURCE, Double> {
-
-    }
-
-    public interface NumericReadColumnValueConverter<ENTITY, TARGET extends Number> extends ColumnValueConverter<ENTITY, Double, TARGET> {
-
     }
 }

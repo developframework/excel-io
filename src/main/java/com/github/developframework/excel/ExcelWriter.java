@@ -107,7 +107,7 @@ public class ExcelWriter extends ExcelProcessor {
         final TableLocation tableLocation = tableDefinition.tableLocation();
         PreparedTableDataHandler<ENTITY, ?> preparedTableDataHandler = (PreparedTableDataHandler<ENTITY, ?>) tableDefinition.preparedTableDataHandler();
         final List<?> finalList = preparedTableDataHandler == null ? list : preparedTableDataHandler.handle(list);
-        final ColumnDefinition<?>[] columnDefinitions = tableDefinition.columnDefinitions(workbook, new ColumnDefinitionBuilder(workbook));
+        final ColumnDefinition<?, ?>[] columnDefinitions = tableDefinition.columnDefinitions(workbook, new ColumnDefinitionBuilder(workbook));
         final int startColumnIndex = tableLocation.getColumn();
 
         int rowIndex = tableLocation.getRow();
@@ -168,12 +168,12 @@ public class ExcelWriter extends ExcelProcessor {
      * @param startColumnIndex  开始列索引
      * @param columnDefinitions 列定义数组
      */
-    private void createTableColumnHeader(Sheet sheet, int rowIndex, final int startColumnIndex, ColumnDefinition<?>[] columnDefinitions) {
+    private void createTableColumnHeader(Sheet sheet, int rowIndex, final int startColumnIndex, ColumnDefinition<?, ?>[] columnDefinitions) {
         Row headerRow = sheet.createRow(rowIndex);
         CellStyle headerCellStyle = DefaultCellStyles.normalCellStyle(workbook);
         for (int i = 0; i < columnDefinitions.length; i++) {
             Cell headerCell = headerRow.createCell(startColumnIndex + i);
-            ColumnDefinition<?> columnDefinition = columnDefinitions[i];
+            ColumnDefinition<?, ?> columnDefinition = columnDefinitions[i];
             if (columnDefinition == null) {
                 continue;
             }
@@ -194,7 +194,7 @@ public class ExcelWriter extends ExcelProcessor {
      * @param list              实体列表
      * @param <ENTITY>          实体类泛型
      */
-    private <ENTITY> void createTableBody(Sheet sheet, int rowIndex, final int startColumnIndex, ColumnDefinition<?>[] columnDefinitions, List<ENTITY> list) {
+    private <ENTITY> void createTableBody(Sheet sheet, int rowIndex, final int startColumnIndex, ColumnDefinition<?, ?>[] columnDefinitions, List<ENTITY> list) {
         // 默认单元格风格
         final CellStyle DEFAULT_CELL_STYLE = DefaultCellStyles.normalCellStyle(workbook);
         // 渲染单元格
@@ -203,7 +203,7 @@ public class ExcelWriter extends ExcelProcessor {
             Row row = sheet.createRow(rowIndex + i);
             for (int j = 0; j < columnDefinitions.length; j++) {
                 Cell cell = row.createCell(startColumnIndex + j);
-                ColumnDefinition<?> columnDefinition = columnDefinitions[j];
+                ColumnDefinition<?, ?> columnDefinition = columnDefinitions[j];
                 if (columnDefinition == null || columnDefinition instanceof BlankColumnDefinition) {
                     cell.setCellStyle(configCellStyle(columnDefinitions[j], DEFAULT_CELL_STYLE, null));
                     continue;
@@ -235,7 +235,7 @@ public class ExcelWriter extends ExcelProcessor {
      * @param columnDefinition 列定义
      * @return 单元格风格
      */
-    private CellStyle configCellStyle(ColumnDefinition<?> columnDefinition, CellStyle defaultCellStyle, Object value) {
+    private CellStyle configCellStyle(ColumnDefinition<?, ?> columnDefinition, CellStyle defaultCellStyle, Object value) {
         CellStyle cellStyle = columnDefinition.cellStyleProvider == null ? defaultCellStyle : columnDefinition.cellStyleProvider.provide(workbook, defaultCellStyle, value);
         if (columnDefinition.format != null) {
             if (cellStyle == defaultCellStyle) {

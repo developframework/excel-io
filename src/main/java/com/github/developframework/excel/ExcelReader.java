@@ -54,12 +54,12 @@ public class ExcelReader extends ExcelProcessor {
         final int totalSize = sheet.getLastRowNum() + 1 - tableLocation.getRow() - (tableDefinition.hasTitle() ? 1 : 0) - (tableDefinition.hasColumnHeader() ? 1 : 0);
         final int startColumnIndex = tableLocation.getColumn();
         int rowIndex = tableLocation.getRow() + (tableDefinition.hasTitle() ? 1 : 0) + (tableDefinition.hasColumnHeader() ? 1 : 0);
-        ColumnDefinition<?>[] columnDefinitions = tableDefinition.columnDefinitions(workbook, new ColumnDefinitionBuilder(workbook));
+        ColumnDefinition<?, ?>[] columnDefinitions = tableDefinition.columnDefinitions(workbook, new ColumnDefinitionBuilder(workbook));
         List<ENTITY> list = new LinkedList<>();
         final int size = readSize != null && readSize < totalSize ? readSize : totalSize;
         for (int i = 0; i < size; i++) {
             Row row = sheet.getRow(rowIndex + i);
-            ColumnDefinition<?> columnDefinition = null;
+            ColumnDefinition<?, ?> columnDefinition = null;
             try {
                 ENTITY entity = entityClass.getConstructor().newInstance();
                 for (int j = 0; j < columnDefinitions.length; j++) {

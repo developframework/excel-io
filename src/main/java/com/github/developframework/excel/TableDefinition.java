@@ -65,7 +65,7 @@ public interface TableDefinition {
     /**
      * 列定义
      */
-    ColumnDefinition<?>[] columnDefinitions(Workbook workbook, ColumnDefinitionBuilder builder);
+    ColumnDefinition<?, ?>[] columnDefinitions(Workbook workbook, ColumnDefinitionBuilder builder);
 
     default SheetExtraHandler<?> sheetExtraHandler() {
         return null;

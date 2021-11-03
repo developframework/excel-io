@@ -16,7 +16,7 @@ public class ColumnDefinitionBuilder {
         this.workbook = workbook;
     }
 
-    public ColumnDefinition<?>[] columnDefinitions(ColumnDefinition<?>... columnDefinitions) {
+    public ColumnDefinition<?, ?>[] columnDefinitions(ColumnDefinition<?, ?>... columnDefinitions) {
         return columnDefinitions;
     }
 
@@ -41,56 +41,41 @@ public class ColumnDefinitionBuilder {
      * @param header 列名
      * @return 字符串定义
      */
-    public StringColumnDefinition string(String field, String header) {
-        return new StringColumnDefinition(workbook, field, header);
+    public <FIELD> StringColumnDefinition<FIELD> string(String field, String header) {
+        return new StringColumnDefinition<>(workbook, field, header);
     }
 
-    public StringColumnDefinition string(String field) {
-        return new StringColumnDefinition(workbook, field, null);
-    }
-
-    /**
-     * 多行值列
-     *
-     * @param field 字段
-     * @param header 列名
-     * @return 多行值列定义
-     */
-    public MultipleLinesColumnDefinition multipleLines(String field, String header) {
-        return new MultipleLinesColumnDefinition(workbook, field, header);
-    }
-
-    public MultipleLinesColumnDefinition multipleLines(String field) {
-        return new MultipleLinesColumnDefinition(workbook, field, null);
+    public <FIELD> StringColumnDefinition<FIELD> string(String field) {
+        return new StringColumnDefinition<>(workbook, field, null);
     }
 
     /**
      * 数值列
      *
-     * @param field 字段
+     * @param field  字段
      * @param header 列名
      * @return 数值列定义
      */
-    public NumericColumnDefinition numeric(String field, String header) {
-        return new NumericColumnDefinition(workbook, field, header);
+    public <FIELD> NumericColumnDefinition<FIELD> numeric(String field, String header) {
+        return new NumericColumnDefinition<>(workbook, field, header);
     }
 
-    public NumericColumnDefinition numeric(String field) {
-        return new NumericColumnDefinition(workbook, field, null);
+    public <FIELD> NumericColumnDefinition<FIELD> numeric(String field) {
+        return new NumericColumnDefinition<>(workbook, field, null);
     }
 
     /**
      * 公式列
      *
      * @param formula 公式字符串
-     * @param header 列名
+     * @param header  列名
      * @return 公式列定义
      */
-    public FormulaColumnDefinition formula(String formula, String header) {
-        return new FormulaColumnDefinition(workbook, formula, header);
+    public <FIELD> FormulaColumnDefinition<FIELD> formula(String formula, String header) {
+        return new FormulaColumnDefinition<>(workbook, formula, header);
     }
 
-    public FormulaColumnDefinition formula(String formula) {
-        return new FormulaColumnDefinition(workbook, formula, null);
+    public <FIELD> FormulaColumnDefinition<FIELD> formula(String formula) {
+        return new FormulaColumnDefinition<>(workbook, formula, null);
     }
 }

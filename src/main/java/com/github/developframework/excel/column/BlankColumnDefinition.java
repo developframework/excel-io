@@ -7,7 +7,7 @@ import org.apache.poi.ss.usermodel.CellType;
 /**
  * @author qiushui on 2019-09-02.
  */
-public class BlankColumnDefinition extends ColumnDefinition<String> {
+public class BlankColumnDefinition extends ColumnDefinition<String, Void> {
 
     public BlankColumnDefinition(String header) {
         super(null, null, header);
@@ -29,12 +29,7 @@ public class BlankColumnDefinition extends ColumnDefinition<String> {
     }
 
     @Override
-    protected String writeConvertValue(Object entity, Object fieldValue) {
-        return null;
-    }
-
-    @Override
-    protected <T> Object readConvertValue(Object entity, String cellValue, Class<T> fieldClass) {
+    protected String writeConvertValue(Object entity, Void fieldValue) {
         return null;
     }
 }

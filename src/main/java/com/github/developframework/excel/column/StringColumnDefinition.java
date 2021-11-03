@@ -1,28 +1,19 @@
 package com.github.developframework.excel.column;
 
 import com.github.developframework.excel.ColumnDefinition;
-import com.github.developframework.excel.ColumnValueConverter;
+import develop.toolkit.base.utils.K;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.Workbook;
 
-import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.time.format.DateTimeFormatter;
+import java.util.function.BiFunction;
 
 /**
  * 字符串列
  *
  * @author qiushui on 2019-05-18.
  */
-@SuppressWarnings("rawtypes")
-public class StringColumnDefinition extends ColumnDefinition<String> {
-
-    private StringWriteColumnValueConverter writeColumnValueConverter;
-
-    private StringReadColumnValueConverter readColumnValueConverter;
+public class StringColumnDefinition<FIELD> extends ColumnDefinition<String, FIELD> {
 
     protected StringColumnDefinition(Workbook workbook, String field, String header) {
         super(workbook, field, header);
@@ -40,73 +31,26 @@ public class StringColumnDefinition extends ColumnDefinition<String> {
 
     @Override
     protected String getCellValue(Cell cell) {
-        String cellValue = dataFormatter.formatCellValue(cell);
-        return cellValue == null ? null : cellValue.trim();
+        return K.map(dataFormatter.formatCellValue(cell), String::trim);
     }
 
-    @SuppressWarnings("unchecked")
     @Override
-    protected <T> Object readConvertValue(Object entity, String cellValue, Class<T> fieldClass) {
-        Object convertValue;
-        if (readColumnValueConverter != null) {
-            convertValue = readColumnValueConverter.convert(entity, cellValue);
-        } else {
-            convertValue = cellValue;
+    protected String writeConvertValue(Object entity, FIELD fieldValue) {
+        if (writeConvertFunction == null) {
+            return K.map(fieldValue, Object::toString);
         }
-        if (convertValue == null) {
-            return null;
-        } else if (fieldClass == convertValue.getClass()) {
-            return convertValue;
-        } else if (fieldClass == String.class) {
-            return convertValue;
-        } else if (fieldClass == Integer.class || fieldClass == int.class) {
-            return Integer.valueOf(convertValue.toString());
-        } else if (fieldClass == Long.class || fieldClass == long.class) {
-            return Long.valueOf(convertValue.toString());
-        } else if (fieldClass == Boolean.class || fieldClass == boolean.class) {
-            return Boolean.valueOf(convertValue.toString());
-        } else if (fieldClass == BigDecimal.class) {
-            return new BigDecimal(convertValue.toString());
-        } else if (fieldClass == Float.class || fieldClass == float.class) {
-            return Float.valueOf(convertValue.toString());
-        } else if (fieldClass == Double.class || fieldClass == double.class) {
-            return Double.valueOf(convertValue.toString());
-        } else if (fieldClass == LocalDateTime.class) {
-            return LocalDateTime.parse(convertValue.toString(), format == null ? DateTimeFormatter.ISO_LOCAL_DATE_TIME : DateTimeFormatter.ofPattern(format));
-        } else if (fieldClass == LocalDate.class) {
-            return LocalDate.parse(convertValue.toString(), format == null ? DateTimeFormatter.ISO_LOCAL_DATE : DateTimeFormatter.ofPattern(format));
-        } else if (fieldClass == LocalTime.class) {
-            return LocalTime.parse(convertValue.toString(), format == null ? DateTimeFormatter.ISO_LOCAL_TIME : DateTimeFormatter.ofPattern(format));
-        } else {
-            throw new IllegalArgumentException("can not convert from \"java.lang.String\" to \"" + fieldClass.getName() + "\"");
-        }
+        return writeConvertFunction.apply(entity, fieldValue);
     }
 
-    @SuppressWarnings("unchecked")
-    @Override
-    protected String writeConvertValue(Object entity, Object fieldValue) {
-        if (writeColumnValueConverter == null) {
-            return fieldValue == null ? null : fieldValue.toString();
-        }
-        return (String) writeColumnValueConverter.convert(entity, fieldValue);
-    }
-
-
-    public <ENTITY, SOURCE> StringColumnDefinition valueToString(Class<SOURCE> clazz, StringWriteColumnValueConverter<ENTITY, SOURCE> writeColumnValueConverter) {
-        this.writeColumnValueConverter = writeColumnValueConverter;
+    @SuppressWarnings("unused")
+    public StringColumnDefinition<FIELD> valueToString(BiFunction<Object, FIELD, String> function) {
+        this.writeConvertFunction = function;
         return this;
     }
 
-    public <ENTITY, TARGET> StringColumnDefinition stringToValue(Class<TARGET> clazz, StringReadColumnValueConverter<ENTITY, TARGET> readColumnValueConverter) {
-        this.readColumnValueConverter = readColumnValueConverter;
+    @SuppressWarnings("unused")
+    public StringColumnDefinition<FIELD> stringToValue(BiFunction<Object, String, FIELD> function) {
+        this.readConvertFunction = function;
         return this;
-    }
-
-    public interface StringWriteColumnValueConverter<ENTITY, SOURCE> extends ColumnValueConverter<ENTITY, SOURCE, String> {
-
-    }
-
-    public interface StringReadColumnValueConverter<ENTITY, TARGET> extends ColumnValueConverter<ENTITY, String, TARGET> {
-
     }
 }
