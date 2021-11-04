@@ -8,13 +8,12 @@ import org.apache.poi.ss.usermodel.Workbook;
  *
  * @author qiushui on 2019-05-18.
  */
-public interface TableDefinition {
+public interface TableDefinition<ENTITY> {
 
     /**
      * 配置表数据预处理器
-     *
      */
-    default PreparedTableDataHandler<?, ?> preparedTableDataHandler() {
+    default PreparedTableDataHandler<?, ENTITY> preparedTableDataHandler() {
         return null;
     }
 
@@ -69,5 +68,12 @@ public interface TableDefinition {
 
     default SheetExtraHandler<?> sheetExtraHandler() {
         return null;
+    }
+
+    /**
+     * 每个处理
+     */
+    default void each(ENTITY entity) {
+
     }
 }

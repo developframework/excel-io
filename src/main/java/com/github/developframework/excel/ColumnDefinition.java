@@ -170,19 +170,19 @@ public abstract class ColumnDefinition<CELL_TYPE, FIELD> {
         } else if (fieldClass == convertValue.getClass()) {
             return convertValue;
         } else if (fieldClass == String.class) {
-            return convertValue;
+            return convertValue.toString();
         } else if (fieldClass == Integer.class || fieldClass == int.class) {
-            return Integer.valueOf(convertValue.toString());
+            return new BigDecimal(convertValue.toString()).intValue();
         } else if (fieldClass == Long.class || fieldClass == long.class) {
-            return Long.valueOf(convertValue.toString());
+            return new BigDecimal(convertValue.toString()).longValue();
         } else if (fieldClass == Boolean.class || fieldClass == boolean.class) {
             return Boolean.valueOf(convertValue.toString());
         } else if (fieldClass == BigDecimal.class) {
             return new BigDecimal(convertValue.toString());
         } else if (fieldClass == Float.class || fieldClass == float.class) {
-            return Float.valueOf(convertValue.toString());
+            return new BigDecimal(convertValue.toString()).floatValue();
         } else if (fieldClass == Double.class || fieldClass == double.class) {
-            return Double.valueOf(convertValue.toString());
+            return new BigDecimal(convertValue.toString()).doubleValue();
         } else if (fieldClass == LocalDateTime.class) {
             return LocalDateTime.parse(convertValue.toString(), format == null ? DateTimeFormatter.ISO_LOCAL_DATE_TIME : DateTimeFormatter.ofPattern(format));
         } else if (fieldClass == LocalDate.class) {

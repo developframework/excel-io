@@ -35,20 +35,20 @@ public class ExcelReader extends ExcelProcessor {
      * @return 实体列表
      */
     @SuppressWarnings("unused")
-    public <ENTITY> List<ENTITY> read(Class<ENTITY> entityClass, TableDefinition tableDefinition) {
+    public <ENTITY> List<ENTITY> read(Class<ENTITY> entityClass, TableDefinition<ENTITY> tableDefinition) {
         return read(entityClass, null, tableDefinition);
     }
 
     /**
      * 读取表格内容
      *
-     * @param entityClass 实体类型
-     * @param readSize 读取数量
+     * @param entityClass     实体类型
+     * @param readSize        读取数量
      * @param tableDefinition 表定义
-     * @param <ENTITY> 实体类泛型
+     * @param <ENTITY>        实体类泛型
      * @return 实体列表
      */
-    public <ENTITY> List<ENTITY> read(Class<ENTITY> entityClass, Integer readSize, TableDefinition tableDefinition) {
+    public <ENTITY> List<ENTITY> read(Class<ENTITY> entityClass, Integer readSize, TableDefinition<ENTITY> tableDefinition) {
         Sheet sheet = getSheet(workbook, tableDefinition);
         TableLocation tableLocation = tableDefinition.tableLocation();
         final int totalSize = sheet.getLastRowNum() + 1 - tableLocation.getRow() - (tableDefinition.hasTitle() ? 1 : 0) - (tableDefinition.hasColumnHeader() ? 1 : 0);
@@ -74,6 +74,7 @@ public class ExcelReader extends ExcelProcessor {
                         FieldUtils.writeDeclaredField(entity, columnDefinition.field, value, true);
                     }
                 }
+                tableDefinition.each(entity);
                 list.add(entity);
             } catch (Exception e) {
                 assert columnDefinition != null;
@@ -85,11 +86,10 @@ public class ExcelReader extends ExcelProcessor {
     }
 
 
-
-    private Sheet getSheet(Workbook workbook, TableDefinition tableDefinition) {
+    private Sheet getSheet(Workbook workbook, TableDefinition<?> tableDefinition) {
         if (tableDefinition.sheet() != null) {
             return workbook.getSheetAt(tableDefinition.sheet());
-        } else if(tableDefinition.sheetName() != null) {
+        } else if (tableDefinition.sheetName() != null) {
             return workbook.getSheet(tableDefinition.sheetName());
         } else {
             return workbook.getSheetAt(0);

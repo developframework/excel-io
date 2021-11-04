@@ -34,7 +34,7 @@ public class ExcelWriter extends ExcelProcessor {
      * @param tableDefinition 表定义
      * @return 写出器
      */
-    public <ENTITY> ExcelWriter load(List<ENTITY> data, TableDefinition tableDefinition) {
+    public <ENTITY> ExcelWriter load(List<ENTITY> data, TableDefinition<ENTITY> tableDefinition) {
         writeInternal(tableDefinition, data);
         return this;
     }
@@ -46,7 +46,7 @@ public class ExcelWriter extends ExcelProcessor {
      * @param tableDefinition 表定义
      * @return 写出器
      */
-    public <ENTITY> ExcelWriter load(ENTITY[] data, TableDefinition tableDefinition) {
+    public <ENTITY> ExcelWriter load(ENTITY[] data, TableDefinition<ENTITY> tableDefinition) {
         writeInternal(tableDefinition, Arrays.asList(data));
         return this;
     }
@@ -101,7 +101,7 @@ public class ExcelWriter extends ExcelProcessor {
      * @param <ENTITY>        实体类泛型
      */
     @SuppressWarnings({"unchecked", "rawtypes"})
-    private <ENTITY> void writeInternal(TableDefinition tableDefinition, List<ENTITY> list) {
+    private <ENTITY> void writeInternal(TableDefinition<ENTITY> tableDefinition, List<ENTITY> list) {
         final Sheet sheet = createSheet(tableDefinition);
         ((SXSSFSheet) sheet).setRandomAccessWindowSize(-1);
         final TableLocation tableLocation = tableDefinition.tableLocation();
@@ -130,7 +130,7 @@ public class ExcelWriter extends ExcelProcessor {
      * @param tableDefinition 表定义
      * @return 工作表
      */
-    private Sheet createSheet(TableDefinition tableDefinition) {
+    private Sheet createSheet(TableDefinition<?> tableDefinition) {
         if (tableDefinition.sheetName() == null) {
             return workbook.createSheet();
         } else {
@@ -205,6 +205,7 @@ public class ExcelWriter extends ExcelProcessor {
                 Cell cell = row.createCell(startColumnIndex + j);
                 ColumnDefinition<?, ?> columnDefinition = columnDefinitions[j];
                 if (columnDefinition == null || columnDefinition instanceof BlankColumnDefinition) {
+                    assert columnDefinitions[j] != null;
                     cell.setCellStyle(configCellStyle(columnDefinitions[j], DEFAULT_CELL_STYLE, null));
                     continue;
                 }
