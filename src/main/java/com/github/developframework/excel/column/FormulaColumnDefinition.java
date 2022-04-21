@@ -16,7 +16,7 @@ public class FormulaColumnDefinition extends ColumnDefinition<Object> {
     @Getter
     private String formula;
 
-    private FormulaEvaluator formulaEvaluator;
+    private final FormulaEvaluator formulaEvaluator;
 
     private FormulaReadColumnValueConverter readColumnValueConverter;
 
