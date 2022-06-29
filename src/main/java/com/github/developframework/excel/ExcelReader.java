@@ -3,13 +3,11 @@ package com.github.developframework.excel;
 import com.github.developframework.excel.column.BlankColumnDefinition;
 import com.github.developframework.excel.column.ColumnDefinitionBuilder;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.reflect.FieldUtils;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 
-import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -36,7 +34,7 @@ public class ExcelReader extends ExcelProcessor {
      */
     @SuppressWarnings("unused")
     public <ENTITY> List<ENTITY> read(Class<ENTITY> entityClass, TableDefinition<ENTITY> tableDefinition) {
-        return read(entityClass, null, tableDefinition);
+        return read(entityClass, Integer.MAX_VALUE, tableDefinition);
     }
 
     /**
@@ -49,19 +47,25 @@ public class ExcelReader extends ExcelProcessor {
      * @return 实体列表
      */
     public <ENTITY> List<ENTITY> read(Class<ENTITY> entityClass, Integer readSize, TableDefinition<ENTITY> tableDefinition) {
-        Sheet sheet = getSheet(workbook, tableDefinition);
-        TableLocation tableLocation = tableDefinition.tableLocation();
-        final int totalSize = sheet.getLastRowNum() + 1 - tableLocation.getRow() - (tableDefinition.hasTitle() ? 1 : 0) - (tableDefinition.hasColumnHeader() ? 1 : 0);
+        final TableInfo tableInfo = tableDefinition.tableInfo();
+        // 获取工作表
+        Sheet sheet = getSheet(workbook, tableInfo);
+
+        // 表格位置
+        TableLocation tableLocation = tableInfo.tableLocation;
+        final int totalSize = sheet.getLastRowNum() + 1 - tableLocation.getRow() - (tableInfo.hasTitle ? 1 : 0) - (tableInfo.hasColumnHeader ? 1 : 0);
         final int startColumnIndex = tableLocation.getColumn();
-        int rowIndex = tableLocation.getRow() + (tableDefinition.hasTitle() ? 1 : 0) + (tableDefinition.hasColumnHeader() ? 1 : 0);
-        ColumnDefinition<?, ?>[] columnDefinitions = tableDefinition.columnDefinitions(workbook, new ColumnDefinitionBuilder(workbook));
-        List<ENTITY> list = new LinkedList<>();
-        final int size = readSize != null && readSize < totalSize ? readSize : totalSize;
+        int rowIndex = tableLocation.getRow() + (tableInfo.hasTitle ? 1 : 0) + (tableInfo.hasColumnHeader ? 1 : 0);
+
+        // 列定义
+        final ColumnDefinition<ENTITY>[] columnDefinitions = tableDefinition.columnDefinitions(workbook, new ColumnDefinitionBuilder(workbook));
+        final int size = Math.min(readSize, totalSize);
+        final List<ENTITY> list = new LinkedList<>();
         for (int i = 0; i < size; i++) {
             Row row = sheet.getRow(rowIndex + i);
-            ColumnDefinition<?, ?> columnDefinition = null;
+            ColumnDefinition<ENTITY> columnDefinition = null;
             try {
-                ENTITY entity = entityClass.getConstructor().newInstance();
+                final ENTITY entity = entityClass.getConstructor().newInstance();
                 for (int j = 0; j < columnDefinitions.length; j++) {
                     columnDefinition = columnDefinitions[j];
                     if (columnDefinition == null || columnDefinition instanceof BlankColumnDefinition) {
@@ -69,16 +73,15 @@ public class ExcelReader extends ExcelProcessor {
                     }
                     Cell cell = row.getCell(startColumnIndex + j);
                     if (cell != null) {
-                        Field field = FieldUtils.getDeclaredField(entityClass, columnDefinition.field, true);
-                        Object value = columnDefinition.readOutCell(entity, cell, field.getType());
-                        FieldUtils.writeDeclaredField(entity, columnDefinition.field, value, true);
+                        // 读取单元格值装填到实体
+                        columnDefinition.readOutCell(workbook, cell, entity);
                     }
                 }
                 tableDefinition.each(entity);
                 list.add(entity);
             } catch (Exception e) {
                 assert columnDefinition != null;
-                log.error("row {} column {}", row.getRowNum(), columnDefinition.field);
+                log.error("row {} column {}", row.getRowNum(), columnDefinition.getColumnInfo().field);
                 throw new RuntimeException(e);
             }
         }
@@ -86,13 +89,11 @@ public class ExcelReader extends ExcelProcessor {
     }
 
 
-    private Sheet getSheet(Workbook workbook, TableDefinition<?> tableDefinition) {
-        if (tableDefinition.sheet() != null) {
-            return workbook.getSheetAt(tableDefinition.sheet());
-        } else if (tableDefinition.sheetName() != null) {
-            return workbook.getSheet(tableDefinition.sheetName());
+    private Sheet getSheet(Workbook workbook, TableInfo tableInfo) {
+        if (tableInfo.sheetName != null) {
+            return workbook.getSheet(tableInfo.sheetName);
         } else {
-            return workbook.getSheetAt(0);
+            return workbook.getSheetAt(tableInfo.sheet);
         }
     }
 }

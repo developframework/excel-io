@@ -1,6 +1,7 @@
 package com.github.developframework.excel.column;
 
 import com.github.developframework.excel.ColumnDefinition;
+import org.apache.poi.ss.usermodel.FormulaEvaluator;
 import org.apache.poi.ss.usermodel.Workbook;
 
 /**
@@ -16,7 +17,8 @@ public class ColumnDefinitionBuilder {
         this.workbook = workbook;
     }
 
-    public ColumnDefinition<?, ?>[] columnDefinitions(ColumnDefinition<?, ?>... columnDefinitions) {
+    @SafeVarargs
+    public final <ENTITY> ColumnDefinition<ENTITY>[] columnDefinitions(ColumnDefinition<ENTITY>... columnDefinitions) {
         return columnDefinitions;
     }
 
@@ -26,42 +28,27 @@ public class ColumnDefinitionBuilder {
      * @param header 列名
      * @return 空列定义
      */
-    public BlankColumnDefinition blank(String header) {
-        return new BlankColumnDefinition(header);
+    public <ENTITY> BlankColumnDefinition<ENTITY> blank(String header) {
+        return new BlankColumnDefinition<>(header);
     }
 
-    public BlankColumnDefinition blank() {
-        return new BlankColumnDefinition(null);
+    public <ENTITY> BlankColumnDefinition<ENTITY> blank() {
+        return blank(null);
     }
 
     /**
-     * 字符串列
+     * 通用列
      *
      * @param field  字段
      * @param header 列名
      * @return 字符串定义
      */
-    public <FIELD> StringColumnDefinition<FIELD> string(String field, String header) {
-        return new StringColumnDefinition<>(workbook, field, header);
+    public <ENTITY, FIELD> GeneralColumnDefinition<ENTITY, FIELD> column(String field, String header) {
+        return new GeneralColumnDefinition<>(field, header);
     }
 
-    public <FIELD> StringColumnDefinition<FIELD> string(String field) {
-        return new StringColumnDefinition<>(workbook, field, null);
-    }
-
-    /**
-     * 数值列
-     *
-     * @param field  字段
-     * @param header 列名
-     * @return 数值列定义
-     */
-    public <FIELD> NumericColumnDefinition<FIELD> numeric(String field, String header) {
-        return new NumericColumnDefinition<>(workbook, field, header);
-    }
-
-    public <FIELD> NumericColumnDefinition<FIELD> numeric(String field) {
-        return new NumericColumnDefinition<>(workbook, field, null);
+    public <ENTITY, FIELD> GeneralColumnDefinition<ENTITY, FIELD> column(String field) {
+        return column(field, null);
     }
 
     /**
@@ -71,11 +58,12 @@ public class ColumnDefinitionBuilder {
      * @param header  列名
      * @return 公式列定义
      */
-    public <FIELD> FormulaColumnDefinition<FIELD> formula(String formula, String header) {
-        return new FormulaColumnDefinition<>(workbook, formula, header);
+    public <ENTITY, FIELD> FormulaColumnDefinition<ENTITY, FIELD> formula(String formula, String header) {
+        final FormulaEvaluator formulaEvaluator = workbook.getCreationHelper().createFormulaEvaluator();
+        return new FormulaColumnDefinition<>(formulaEvaluator, formula, header);
     }
 
-    public <FIELD> FormulaColumnDefinition<FIELD> formula(String formula) {
-        return new FormulaColumnDefinition<>(workbook, formula, null);
+    public <ENTITY, FIELD> FormulaColumnDefinition<ENTITY, FIELD> formula(String formula) {
+        return formula(formula, null);
     }
 }

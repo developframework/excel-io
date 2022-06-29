@@ -1,7 +1,11 @@
 package com.github.developframework.excel;
 
 import com.github.developframework.excel.column.ColumnDefinitionBuilder;
+import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.Workbook;
+
+import java.util.Collections;
+import java.util.Map;
 
 /**
  * 表定义
@@ -11,69 +15,32 @@ import org.apache.poi.ss.usermodel.Workbook;
 public interface TableDefinition<ENTITY> {
 
     /**
-     * 配置表数据预处理器
+     * 表格信息
      */
-    default PreparedTableDataHandler<?, ENTITY> preparedTableDataHandler() {
-        return null;
-    }
-
-    /**
-     * 是否有标题
-     *
-     */
-    default boolean hasTitle() {
-        return false;
-    }
-
-    /**
-     * 标题
-     *
-     */
-    default String title() {
-        return null;
-    }
-
-    /**
-     * 是否有列头
-     */
-    default boolean hasColumnHeader() {
-        return true;
-    }
-
-    /**
-     * 工作表名称
-     */
-    default String sheetName() {
-        return null;
-    }
-
-    /**
-     * 工作表
-     */
-    default Integer sheet() {
-        return null;
-    }
-
-    /**
-     * 表格位置
-     */
-    default TableLocation tableLocation() {
-        return TableLocation.of(0, 0);
+    default TableInfo tableInfo() {
+        return new TableInfo();
     }
 
     /**
      * 列定义
      */
-    ColumnDefinition<?, ?>[] columnDefinitions(Workbook workbook, ColumnDefinitionBuilder builder);
-
-    default SheetExtraHandler<?> sheetExtraHandler() {
-        return null;
-    }
+    ColumnDefinition<ENTITY>[] columnDefinitions(Workbook workbook, ColumnDefinitionBuilder builder);
 
     /**
      * 每个处理
      */
     default void each(ENTITY entity) {
 
+    }
+
+    /**
+     * 自定义单元格样式
+     */
+    default Map<String, CellStyle> customCellStyles(Workbook workbook) {
+        return Collections.emptyMap();
+    }
+
+    default SheetExtraHandler<?> sheetExtraHandler() {
+        return null;
     }
 }

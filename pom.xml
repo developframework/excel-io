@@ -40,11 +40,14 @@
     </scm>
 
     <properties>
-        <version.lombok>1.18.20</version.lombok>
+        <maven.compiler.source>11</maven.compiler.source>
+        <maven.compiler.target>11</maven.compiler.target>
+
+        <version.lombok>1.18.24</version.lombok>
         <version.poi>4.1.0</version.poi>
-        <version.commons-lang3>3.9</version.commons-lang3>
+        <version.commons-lang3>3.12.0</version.commons-lang3>
         <version.expression>1.5.1</version.expression>
-        <version.develop-toolkit>1.0.3</version.develop-toolkit>
+        <version.slf4j-api>1.7.36</version.slf4j-api>
     </properties>
 
     <dependencies>
@@ -75,9 +78,9 @@
             <version>${version.expression}</version>
         </dependency>
         <dependency>
-            <groupId>com.github.developframework</groupId>
-            <artifactId>develop-toolkit-base</artifactId>
-            <version>${version.develop-toolkit}</version>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>${version.slf4j-api}</version>
         </dependency>
     </dependencies>
 
