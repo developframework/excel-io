@@ -11,41 +11,93 @@
 
 ## 教程
 
-假设存在实体`Customer`包装数据
+假设存在实体`Student`包装数据（构造方法略）
 
 ```java
-@Data
-public class Customer {
+public class Student {
 
+    // 姓名
     private String name;
 
-    private LocalDate buyDate;
+    // 性别
+    private Gender gender;
 
-    private String[] tickets;
+    // 生日
+    private LocalDate birthday;
 
-    private int cost;
+    // 入学时间
+    private LocalDateTime createTime;
+
+    // 语文成绩
+    private int chineseScore;
+
+    // 数学成绩
+    private int mathScore;
+
+    // 英语成绩
+    private int englishScore;
+
+    // 总成绩
+    private int totalScore;
+
+    // 是否合格
+    private Boolean qualified;
+
+    public enum Gender {
+
+        MALE, FEMALE
+    }
 }
+```
+
+```java
+List<Student> students=List.of(
+        new Student("小赵",Student.Gender.MALE,LocalDate.of(2002,1,5),LocalDateTime.now(),97,85,95),
+        new Student("小钱",Student.Gender.FEMALE,LocalDate.of(1999,12,25),LocalDateTime.now(),92,89,87),
+        new Student("小孙",Student.Gender.MALE,LocalDate.of(2001,6,8),LocalDateTime.now(),50,40,45),
+        new Student("小李",Student.Gender.FEMALE,LocalDate.of(2003,8,20),LocalDateTime.now(),80,90,72)
+        );
 ```
 
 ### ExcelIO
 
 使用`ExcelIO`得到输入输出处理器
 
-#### ExcelWriter
+#### 写出数据到Excel
 
 ```java
-ExcelIO
-    .writer(ExcelType.XLSX)
-	.load(customers, tableDefinition)
-    .write(outputStream);
+List<Student> students=new LinkedList<>();
+// 准备数据略
+        File file=ExcelIO
+        .writer(ExcelType.XLSX)
+        .load(students,(workbook,builder)->
+        builder.columnDefinitions(
+        builder.<Student, String>column("name","学生姓名"),
+        builder.<Student, Student.Gender>column("gender","性别"),
+        builder.<Student, LocalDate>column("birthday","生日"),
+        builder.<Student, LocalDateTime>column("createTime","入学时间"),
+        builder.<Student, LocalDate>column("chineseScore","语文成绩"),
+        builder.<Student, LocalDate>column("mathScore","数学成绩"),
+        builder.<Student, LocalDate>column("englishScore","英语成绩"),
+        builder.<Student, Integer>formula("总成绩","SUM(E{row}:G{row})"),
+        builder.<Student, String>formula("是否合格","=IF(H{row} >= 180,\"合格\",\"不合格\")")
+        )
+        )
+        .writeToFile("D:\\学生成绩表.xlsx");
 ```
-#### ExcelReader
+
+![](doc-images/1.jpg)
+
+#### 从Excel读取数据
+
+使用`excel-io`导入students数据
 
 ```java
-List<Customer> customers = ExcelIO
-    .reader(ExcelType.XLSX, inputStream)
-    .read(Customer.class, tableDefinition);
+
+
 ```
+
+![](doc-images/image1.png)
 
 ### TableDefinition
 
@@ -66,59 +118,3 @@ List<Customer> customers = ExcelIO
 ### ColumnDefinition
 
 该抽象类是表格的列定义类，一个定义类代表了表中的某一列，指代了一个字段
-
-内置有如下实现类：
-
-+ StringColumnDefinition
-
-  文本列，默认单元格格式为加边框，文字居中，单元格类型为STRING
-
-+ FormulaColumnDefinition
-
-  公式列，默认单元格格式为加边框，文字居中，单元格类型为FORMULA
-
-+ NumericColumnDefinition
-
-  数值列，默认单元格格式为加边框，文字居中，单元格类型为NUMERIC
-
-+ BlankColumnDefintion
-
-  空白列，默认单元格格式为加边框，文字居中，单元格类型为BLANK
-
-+ MultipleLinesColumnDefinition
-
-  多行文本列，默认单元格格式为加边框，文字居中，单元格类型为STRING
-
-## 写出数据到Excel
-
-使用`excel-io`导入customer数据
-
-```java
-List<Customer> customers = new LinkedList<>();
-// 准备数据略
-ExcelIO
-        .writer(ExcelType.XLSX)
-        .load(customers, (workbook, builder) -> builder.columnDefinitions(
-                builder.string("name", "姓名"),
-                builder.string("buyDate", "购买日期"),
-                builder.multipleLines("tickets", "所购门票"),
-                builder.numeric("cost", "花费").format("￥0.00")
-        ))
-        .write(outputStream);
-```
-
-## 从Excel读取数据
-
-使用`excel-io`导出customer数据
-
-```java
-List<Customer> customers = ExcelIO
-        .reader(inputStream)
-        .read(Customer.class, (workbook, builder) -> builder.columnDefinitions(
-                builder.string("name", "姓名"),
-                builder.string("buyDate", "购买日期"),
-                builder.multipleLines("tickets", "所购门票"),
-                builder.numeric("cost", "花费").format("￥0.00")
-        ));
-```
-![](doc-images/image1.png)

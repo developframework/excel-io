@@ -1,5 +1,6 @@
 package com.github.developframework.excel;
 
+import com.github.developframework.excel.styles.CellStyleManager;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Workbook;
 

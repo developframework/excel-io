@@ -1,8 +1,10 @@
 package com.github.developframework.excel.column;
 
 import com.github.developframework.excel.AbstractColumnDefinition;
+import com.github.developframework.excel.ValueConvertUtils;
 import lombok.Getter;
 import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.CellValue;
 import org.apache.poi.ss.usermodel.FormulaEvaluator;
 
@@ -12,37 +14,38 @@ import org.apache.poi.ss.usermodel.FormulaEvaluator;
 public class FormulaColumnDefinition<ENTITY, FIELD> extends AbstractColumnDefinition<ENTITY, FIELD> {
 
     @Getter
-    private String formula;
+    private final String formula;
 
     private final FormulaEvaluator formulaEvaluator;
 
-    public FormulaColumnDefinition(FormulaEvaluator formulaEvaluator, String field, String header) {
+    public FormulaColumnDefinition(FormulaEvaluator formulaEvaluator, String field, String header, String formula) {
         super(field, header);
+        this.formula = formula;
         this.formulaEvaluator = formulaEvaluator;
     }
 
     @Override
-    protected Object getCellValue(Cell cell) {
-        CellValue cellValue = formulaEvaluator.evaluate(cell);
-        switch (cellValue.getCellType()) {
+    protected void setCellValue(Cell cell, Object convertValue) {
+        cell.setCellFormula(
+                formula
+                        .replaceAll("\\{\\s*row\\s*}", String.valueOf(cell.getRowIndex() + 1))
+                        .replaceAll("\\{\\s*column\\s*}", String.valueOf(cell.getColumnIndex() + 1))
+        );
+    }
+
+    @Override
+    protected Object getCellValue(Cell cell, Class<?> fieldClass) {
+        final CellType cellType = formulaEvaluator.evaluateFormulaCell(cell);
+        final CellValue cellValue = formulaEvaluator.evaluate(cell);
+        switch (cellType) {
             case NUMERIC:
-                return cellValue.getNumberValue();
-            case STRING: {
-                final String value = cell.getStringCellValue();
-                return value != null ? value.trim() : null;
-            }
+                return ValueConvertUtils.doubleConvert(cellValue.getNumberValue(), fieldClass);
             case BOOLEAN:
-                return cellValue.getBooleanValue();
+                return ValueConvertUtils.booleanConvert(cellValue.getBooleanValue(), fieldClass);
+            case STRING:
+                return cellValue.getStringValue();
             default:
                 return null;
         }
-    }
-
-    //    fieldValue = columnInfo.field
-//            .replaceAll("\\{\\s*row\\s*}", String.valueOf(cell.getRowIndex() + 1))
-//            .replaceAll("\\{\\s*column\\s*}", String.valueOf(cell.getColumnIndex() + 1));
-    public FormulaColumnDefinition<ENTITY, FIELD> formula(String formula) {
-        this.formula = formula;
-        return this;
     }
 }

@@ -13,6 +13,8 @@ public class ColumnDefinitionBuilder {
 
     private final Workbook workbook;
 
+    private FormulaEvaluator formulaEvaluator;
+
     public ColumnDefinitionBuilder(Workbook workbook) {
         this.workbook = workbook;
     }
@@ -58,12 +60,18 @@ public class ColumnDefinitionBuilder {
      * @param header  列名
      * @return 公式列定义
      */
-    public <ENTITY, FIELD> FormulaColumnDefinition<ENTITY, FIELD> formula(String formula, String header) {
-        final FormulaEvaluator formulaEvaluator = workbook.getCreationHelper().createFormulaEvaluator();
-        return new FormulaColumnDefinition<>(formulaEvaluator, formula, header);
+    public <ENTITY, FIELD> FormulaColumnDefinition<ENTITY, FIELD> formula(String field, String header, String formula) {
+        if (formulaEvaluator == null) {
+            formulaEvaluator = workbook.getCreationHelper().createFormulaEvaluator();
+        }
+        return new FormulaColumnDefinition<>(formulaEvaluator, field, header, formula);
     }
 
-    public <ENTITY, FIELD> FormulaColumnDefinition<ENTITY, FIELD> formula(String formula) {
-        return formula(formula, null);
+    public <ENTITY, FIELD> FormulaColumnDefinition<ENTITY, FIELD> formula(String header, String formula) {
+        return formula(null, header, formula);
+    }
+
+    public <ENTITY, FIELD> FormulaColumnDefinition<ENTITY, FIELD> formula(String field) {
+        return formula(field, null, null);
     }
 }

@@ -3,40 +3,40 @@ package com.github.developframework.excel.styles;
 import org.apache.poi.ss.usermodel.*;
 
 /**
- * 默认的单元格风格
+ * 默认的单元格样式
  *
  * @author qiushui on 2019-01-14.
  */
 public final class DefaultCellStyles {
+
+    public static final String STYLE_NORMAL = "normal";
+    public static final String STYLE_NORMAL_DATETIME = "normalDateTime";
+    public static final String STYLE_NORMAL_NUMBER = "normalNumber";
+
+    public static final String STYLE_NORMAL_BOLD = "normalBold";
 
     /**
      * 普通单元格风格
      */
     public static CellStyle normalCellStyle(Workbook workbook) {
         CellStyle cellStyle = workbook.createCellStyle();
-        borderThinAndVHCenter(cellStyle);
-        return cellStyle;
-    }
-
-    /**
-     * 生成数字型单元格风格
-     */
-    public static CellStyle numberCellStyle(Workbook workbook) {
-        final CellStyle cellStyle = normalCellStyle(workbook);
-        cellStyle.setDataFormat(workbook.createDataFormat().getFormat("0.00"));
-        return cellStyle;
-    }
-
-    /**
-     * 细边框并文本垂直水平居中
-     */
-    public static void borderThinAndVHCenter(CellStyle cellStyle) {
+        // 细边框并文本垂直水平居中
         cellStyle.setBorderBottom(BorderStyle.THIN);
         cellStyle.setBorderLeft(BorderStyle.THIN);
         cellStyle.setBorderRight(BorderStyle.THIN);
         cellStyle.setBorderTop(BorderStyle.THIN);
         cellStyle.setAlignment(HorizontalAlignment.CENTER);
         cellStyle.setVerticalAlignment(VerticalAlignment.CENTER);
+        return cellStyle;
+    }
+
+    /**
+     * 生成数字型单元格风格 （右对齐）
+     */
+    public static CellStyle normalNumberCellStyle(Workbook workbook) {
+        final CellStyle cellStyle = normalCellStyle(workbook);
+        cellStyle.setAlignment(HorizontalAlignment.RIGHT);
+        return cellStyle;
     }
 
     /**
@@ -49,14 +49,13 @@ public final class DefaultCellStyles {
     }
 
     /**
-     * 设置对齐方式
+     * 默认加粗格式
      */
-    public static void alignment(CellStyle cellStyle, HorizontalAlignment horizontalAlignment, VerticalAlignment verticalAlignment) {
-        if (horizontalAlignment != null) {
-            cellStyle.setAlignment(horizontalAlignment);
-        }
-        if (verticalAlignment != null) {
-            cellStyle.setVerticalAlignment(verticalAlignment);
-        }
+    public static CellStyle normalBoldCellStyle(Workbook workbook) {
+        final CellStyle cellStyle = normalCellStyle(workbook);
+        Font font = workbook.createFont();
+        font.setBold(true);
+        cellStyle.setFont(font);
+        return cellStyle;
     }
 }

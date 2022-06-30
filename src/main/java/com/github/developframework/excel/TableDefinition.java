@@ -6,6 +6,7 @@ import org.apache.poi.ss.usermodel.Workbook;
 
 import java.util.Collections;
 import java.util.Map;
+import java.util.function.Consumer;
 
 /**
  * 表定义
@@ -38,6 +39,13 @@ public interface TableDefinition<ENTITY> {
      */
     default Map<String, CellStyle> customCellStyles(Workbook workbook) {
         return Collections.emptyMap();
+    }
+
+    /**
+     * 全局样式处理
+     */
+    default Consumer<CellStyle> globalCellStylesHandle() {
+        return null;
     }
 
     default SheetExtraHandler<?> sheetExtraHandler() {

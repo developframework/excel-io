@@ -1,12 +1,17 @@
 package com.github.developframework.excel;
 
+import com.github.developframework.excel.styles.CellStyleManager;
+import com.github.developframework.excel.styles.DefaultCellStyles;
 import com.github.developframework.expression.ExpressionUtils;
+import lombok.Getter;
 import lombok.SneakyThrows;
 import org.apache.commons.lang3.reflect.FieldUtils;
 import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.DataFormatter;
+import org.apache.poi.ss.usermodel.CellType;
+import org.apache.poi.ss.usermodel.DateUtil;
 import org.apache.poi.ss.usermodel.Workbook;
 
+import java.lang.reflect.Field;
 import java.math.BigDecimal;
 import java.time.*;
 import java.util.Date;
@@ -21,16 +26,15 @@ import java.util.function.BiFunction;
 @SuppressWarnings("unused")
 public abstract class AbstractColumnDefinition<ENTITY, FIELD> implements ColumnDefinition<ENTITY> {
 
+    @Getter
     protected ColumnInfo columnInfo;
-    protected DataFormatter dataFormatter;
     protected BiFunction<ENTITY, FIELD, Object> writeConvertFunction;
     protected BiFunction<ENTITY, Object, FIELD> readConvertFunction;
 
     protected BiFunction<Cell, Object, String> cellStyleKeyProvider;
 
     public AbstractColumnDefinition(String field, String header) {
-        this.columnInfo = new ColumnInfo(field, header);
-        this.dataFormatter = new DataFormatter();
+        this.columnInfo = new ColumnInfo(field, header == null ? field : header);
     }
 
     /**
@@ -58,7 +62,8 @@ public abstract class AbstractColumnDefinition<ENTITY, FIELD> implements ColumnD
     @Override
     @SuppressWarnings("unchecked")
     public final void readOutCell(Workbook workbook, Cell cell, ENTITY entity) {
-        final Object cellValue = getCellValue(cell);
+        final Field field = FieldUtils.getDeclaredField(entity.getClass(), columnInfo.field, true);
+        final Object cellValue = getCellValue(cell, field.getType());
         final FIELD convertValue = readConvertFunction == null ? (FIELD) cellValue : readConvertFunction.apply(entity, cellValue);
         if (convertValue != null) {
             setEntityValue(entity, convertValue);
@@ -96,6 +101,8 @@ public abstract class AbstractColumnDefinition<ENTITY, FIELD> implements ColumnD
                 cell.setCellValue(convertValue.toString());
             } else if (clazz == java.util.Date.class) {
                 cell.setCellValue((java.util.Date) convertValue);
+            } else {
+                cell.setCellValue(convertValue.toString());
             }
         }
     }
@@ -106,17 +113,41 @@ public abstract class AbstractColumnDefinition<ENTITY, FIELD> implements ColumnD
      * @param cell 单元格
      * @return 单元格值
      */
-    protected abstract Object getCellValue(Cell cell);
+    protected Object getCellValue(Cell cell, Class<?> fieldClass) {
+        final Object value;
+        switch (cell.getCellType()) {
+            case STRING:
+                value = ValueConvertUtils.stringConvert(cell.getRichStringCellValue().getString(), fieldClass);
+                break;
+            case NUMERIC:
+                if (DateUtil.isCellDateFormatted(cell)) {
+                    value = ValueConvertUtils.dateConvert(cell.getDateCellValue(), fieldClass);
+                } else {
+                    value = ValueConvertUtils.doubleConvert(cell.getNumericCellValue(), fieldClass);
+                }
+                break;
+            case BOOLEAN:
+                value = ValueConvertUtils.booleanConvert(cell.getBooleanCellValue(), fieldClass);
+                break;
+//            case FORMULA:
+//                value = cell.getCellFormula();
+//                break;
+            default:
+                value = null;
+                break;
+        }
+        return value;
+    }
 
     /**
      * 赋值给实体
      *
-     * @param entity     实体
-     * @param fieldValue 字段值
+     * @param entity 实体
+     * @param value  值
      */
     @SneakyThrows(IllegalAccessException.class)
-    protected void setEntityValue(ENTITY entity, FIELD fieldValue) {
-        FieldUtils.writeDeclaredField(entity, columnInfo.field, fieldValue, true);
+    protected void setEntityValue(ENTITY entity, Object value) {
+        FieldUtils.writeDeclaredField(entity, columnInfo.field, value, true);
     }
 
     /**
@@ -140,44 +171,6 @@ public abstract class AbstractColumnDefinition<ENTITY, FIELD> implements ColumnD
         return this;
     }
 
-    /**
-     * 读取转化值
-     *
-     * @param entity     实体
-     * @param cellValue  单元格值
-     * @param fieldClass 字段类型
-     * @return 字段值
-     */
-    private Object readConvertValue(ENTITY entity, Object cellValue, Class<?> fieldClass) {
-        Object convertValue;
-        if (readConvertFunction != null) {
-            convertValue = readConvertFunction.apply(entity, cellValue);
-        } else {
-            convertValue = cellValue;
-        }
-        if (convertValue == null) {
-            return null;
-        } else if (fieldClass == convertValue.getClass()) {
-            return convertValue;
-        } else if (fieldClass == String.class) {
-            return convertValue.toString();
-        } else if (fieldClass == Integer.class || fieldClass == int.class) {
-            return new BigDecimal(convertValue.toString()).intValue();
-        } else if (fieldClass == Long.class || fieldClass == long.class) {
-            return new BigDecimal(convertValue.toString()).longValue();
-        } else if (fieldClass == Boolean.class || fieldClass == boolean.class) {
-            return Boolean.valueOf(convertValue.toString());
-        } else if (fieldClass == BigDecimal.class) {
-            return new BigDecimal(convertValue.toString());
-        } else if (fieldClass == Float.class || fieldClass == float.class) {
-            return new BigDecimal(convertValue.toString()).floatValue();
-        } else if (fieldClass == Double.class || fieldClass == double.class) {
-            return new BigDecimal(convertValue.toString()).doubleValue();
-        } else {
-            throw new IllegalArgumentException("can not convert from \"java.lang.String\" to \"" + fieldClass.getName() + "\"");
-        }
-    }
-
     @Override
     public void configureCellStyle(Cell cell, CellStyleManager cellStyleManager, Object value) {
         final String key;
@@ -193,11 +186,15 @@ public abstract class AbstractColumnDefinition<ENTITY, FIELD> implements ColumnD
      * 决定单元格格式键
      */
     protected String determineCellStyleKey(Cell cell, Object value) {
-        final Class<?> valueClass = value.getClass();
-        if (valueClass == LocalDateTime.class || valueClass == ZonedDateTime.class || valueClass == java.util.Date.class) {
-            return CellStyleManager.STYLE_NORMAL_DATETIME;
+        if (cell.getCellType() == CellType.NUMERIC) {
+            final Class<?> valueClass = value.getClass();
+            if (valueClass == LocalDateTime.class || valueClass == ZonedDateTime.class || valueClass == java.util.Date.class) {
+                return DefaultCellStyles.STYLE_NORMAL_DATETIME;
+            } else if (Number.class.isAssignableFrom(valueClass)) {
+                return DefaultCellStyles.STYLE_NORMAL_NUMBER;
+            }
         }
-        return CellStyleManager.STYLE_NORMAL;
+        return DefaultCellStyles.STYLE_NORMAL;
     }
 
     public AbstractColumnDefinition<ENTITY, FIELD> writeConvert(BiFunction<ENTITY, FIELD, Object> writeConvertFunction) {

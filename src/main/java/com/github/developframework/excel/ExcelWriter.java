@@ -1,15 +1,13 @@
 package com.github.developframework.excel;
 
 import com.github.developframework.excel.column.ColumnDefinitionBuilder;
-import org.apache.commons.lang3.StringUtils;
+import com.github.developframework.excel.styles.CellStyleManager;
+import com.github.developframework.excel.styles.DefaultCellStyles;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.streaming.SXSSFSheet;
 
-import java.io.ByteArrayOutputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
+import java.io.*;
 import java.util.Arrays;
 import java.util.List;
 
@@ -64,9 +62,11 @@ public class ExcelWriter extends ExcelProcessor {
      *
      * @param filename 文件名
      */
-    public void writeToFile(String filename) {
-        try (OutputStream os = new FileOutputStream(filename)) {
+    public File writeToFile(String filename) {
+        File file = new File(filename);
+        try (OutputStream os = new FileOutputStream(file)) {
             write(os);
+            return file;
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -158,9 +158,11 @@ public class ExcelWriter extends ExcelProcessor {
         } else {
             sheet = workbook.createSheet(tableInfo.sheetName);
         }
-        ((SXSSFSheet) sheet).setRandomAccessWindowSize(-1);
-        // 开启追踪列宽
-        ((SXSSFSheet) sheet).trackAllColumnsForAutoSizing();
+        if (sheet instanceof SXSSFSheet) {
+            ((SXSSFSheet) sheet).setRandomAccessWindowSize(-1);
+            // 开启追踪列宽
+            ((SXSSFSheet) sheet).trackAllColumnsForAutoSizing();
+        }
         return sheet;
     }
 
@@ -175,9 +177,9 @@ public class ExcelWriter extends ExcelProcessor {
      * @param columnSize       列数量
      */
     private void createTableTitle(Sheet sheet, CellStyleManager cellStyleManager, int rowIndex, final int startColumnIndex, String title, int columnSize) {
-        if (StringUtils.isNotEmpty(title)) {
+        if (title != null && !title.isBlank()) {
             Row titleRow = sheet.createRow(rowIndex);
-            final CellStyle cellStyle = cellStyleManager.getCellStyle(CellStyleManager.STYLE_NORMAL);
+            final CellStyle cellStyle = cellStyleManager.getCellStyle(DefaultCellStyles.STYLE_NORMAL);
             for (int i = startColumnIndex; i < startColumnIndex + columnSize; i++) {
                 titleRow.createCell(i).setCellStyle(cellStyle);
             }
@@ -199,7 +201,7 @@ public class ExcelWriter extends ExcelProcessor {
      */
     private <ENTITY> void createTableColumnHeader(Sheet sheet, CellStyleManager cellStyleManager, int rowIndex, final int startColumnIndex, ColumnDefinition<ENTITY>[] columnDefinitions) {
         Row headerRow = sheet.createRow(rowIndex);
-        final CellStyle headerCellStyle = cellStyleManager.getCellStyle(CellStyleManager.STYLE_NORMAL);
+        final CellStyle headerCellStyle = cellStyleManager.getCellStyle(DefaultCellStyles.STYLE_NORMAL_BOLD);
         ColumnDefinition<ENTITY> columnDefinition;
         for (int i = 0; i < columnDefinitions.length; i++) {
             final Cell headerCell = headerRow.createCell(startColumnIndex + i);
