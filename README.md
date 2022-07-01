@@ -56,7 +56,7 @@ List<Student> students=List.of(
         new Student("小钱",Student.Gender.FEMALE,LocalDate.of(1999,12,25),LocalDateTime.now(),92,89,87),
         new Student("小孙",Student.Gender.MALE,LocalDate.of(2001,6,8),LocalDateTime.now(),50,40,45),
         new Student("小李",Student.Gender.FEMALE,LocalDate.of(2003,8,20),LocalDateTime.now(),80,90,72)
-        );
+);
 ```
 
 ### ExcelIO
@@ -71,19 +71,19 @@ List<Student> students=new LinkedList<>();
         File file=ExcelIO
         .writer(ExcelType.XLSX)
         .load(students,(workbook,builder)->
-        builder.columnDefinitions(
-        builder.<Student, String>column("name","学生姓名"),
-        builder.<Student, Student.Gender>column("gender","性别"),
-        builder.<Student, LocalDate>column("birthday","生日"),
-        builder.<Student, LocalDateTime>column("createTime","入学时间"),
-        builder.<Student, LocalDate>column("chineseScore","语文成绩"),
-        builder.<Student, LocalDate>column("mathScore","数学成绩"),
-        builder.<Student, LocalDate>column("englishScore","英语成绩"),
-        builder.<Student, Integer>formula("总成绩","SUM(E{row}:G{row})"),
-        builder.<Student, String>formula("是否合格","=IF(H{row} >= 180,\"合格\",\"不合格\")")
+            builder.columnDefinitions(
+            builder.<Student, String>column("name","学生姓名"),
+            builder.<Student, Student.Gender>column("gender","性别"),
+            builder.<Student, LocalDate>column("birthday","生日"),
+            builder.<Student, LocalDateTime>column("createTime","入学时间"),
+            builder.<Student, LocalDate>column("chineseScore","语文成绩"),
+            builder.<Student, LocalDate>column("mathScore","数学成绩"),
+            builder.<Student, LocalDate>column("englishScore","英语成绩"),
+            builder.<Student, Integer>formula("总成绩","SUM(E{row}:G{row})"),
+            builder.<Student, String>formula("是否合格","=IF(H{row} >= 180,\"合格\",\"不合格\")")
         )
-        )
-        .writeToFile("D:\\学生成绩表.xlsx");
+)
+.writeToFile("D:\\学生成绩表.xlsx");
 ```
 
 ![](doc-images/1.jpg)
@@ -118,3 +118,18 @@ List<Student> students=new LinkedList<>();
 ### ColumnDefinition
 
 该抽象类是表格的列定义类，一个定义类代表了表中的某一列，指代了一个字段
+可通过ColumnDefinitionBuilder方便创建ColumnDefinition的实例
+
+```java
+builder.columnDefinitions(
+    builder.<Student /*实体泛型*/, String /*字段泛型*/>column("name", "学生姓名")
+            // 写转化值
+            .writeConvert((student, field) -> /* 处理逻辑 */)
+            // 读转化值
+            .readConvert((student, field) -> /* 处理逻辑 */)
+            // 手动设置列宽
+            .columnWidth(20)
+            // 获得样式键 （可以针对单元格值来选择样式）
+            .cellStyleKey((cell, cellValue) -> /* 获得样式键 */)
+);
+```
