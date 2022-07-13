@@ -4,7 +4,6 @@ import com.github.developframework.excel.AbstractColumnDefinition;
 import com.github.developframework.excel.ValueConvertUtils;
 import lombok.Getter;
 import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.CellValue;
 import org.apache.poi.ss.usermodel.FormulaEvaluator;
 
@@ -16,12 +15,15 @@ public class FormulaColumnDefinition<ENTITY, FIELD> extends AbstractColumnDefini
     @Getter
     private final String formula;
 
+    private final Class<?> fieldClass;
+
     private final FormulaEvaluator formulaEvaluator;
 
-    public FormulaColumnDefinition(FormulaEvaluator formulaEvaluator, String field, String header, String formula) {
+    public FormulaColumnDefinition(FormulaEvaluator formulaEvaluator, String field, String header, String formula, Class<?> fieldClass) {
         super(field, header);
         this.formula = formula;
         this.formulaEvaluator = formulaEvaluator;
+        this.fieldClass = fieldClass;
     }
 
     @Override
@@ -34,16 +36,15 @@ public class FormulaColumnDefinition<ENTITY, FIELD> extends AbstractColumnDefini
     }
 
     @Override
-    protected Object getCellValue(Cell cell, Class<?> fieldClass) {
-        final CellType cellType = formulaEvaluator.evaluateFormulaCell(cell);
+    public Object getCellValue(Cell cell, Class<?> fieldClass) {
         final CellValue cellValue = formulaEvaluator.evaluate(cell);
-        switch (cellType) {
+        switch (cellValue.getCellType()) {
             case NUMERIC:
-                return ValueConvertUtils.doubleConvert(cellValue.getNumberValue(), fieldClass);
+                return ValueConvertUtils.doubleConvert(cellValue.getNumberValue(), this.fieldClass);
             case BOOLEAN:
-                return ValueConvertUtils.booleanConvert(cellValue.getBooleanValue(), fieldClass);
+                return ValueConvertUtils.booleanConvert(cellValue.getBooleanValue(), this.fieldClass);
             case STRING:
-                return cellValue.getStringValue();
+                return ValueConvertUtils.stringConvert(cellValue.getStringValue(), this.fieldClass);
             default:
                 return null;
         }

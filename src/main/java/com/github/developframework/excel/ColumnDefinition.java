@@ -17,7 +17,7 @@ public interface ColumnDefinition<ENTITY> {
     }
 
     /**
-     * 写入单元格
+     * 描述如何把值写入单元格
      *
      * @return 字段值
      */
@@ -26,7 +26,7 @@ public interface ColumnDefinition<ENTITY> {
     }
 
     /**
-     * 从单元格读取
+     * 描述如何从单元格读取值并装填到实体
      */
     default void readOutCell(Workbook workbook, Cell cell, ENTITY entity) {
     }

@@ -60,18 +60,18 @@ public class ColumnDefinitionBuilder {
      * @param header  列名
      * @return 公式列定义
      */
-    public <ENTITY, FIELD> FormulaColumnDefinition<ENTITY, FIELD> formula(String field, String header, String formula) {
+    public <ENTITY, FIELD> FormulaColumnDefinition<ENTITY, FIELD> formula(Class<?> fieldClass, String field, String header, String formula) {
         if (formulaEvaluator == null) {
             formulaEvaluator = workbook.getCreationHelper().createFormulaEvaluator();
         }
-        return new FormulaColumnDefinition<>(formulaEvaluator, field, header, formula);
+        return new FormulaColumnDefinition<>(formulaEvaluator, field, header, formula, fieldClass);
     }
 
-    public <ENTITY, FIELD> FormulaColumnDefinition<ENTITY, FIELD> formula(String header, String formula) {
-        return formula(null, header, formula);
+    public <ENTITY, FIELD> FormulaColumnDefinition<ENTITY, FIELD> formula(Class<?> fieldClass, String header, String formula) {
+        return formula(fieldClass, null, header, formula);
     }
 
-    public <ENTITY, FIELD> FormulaColumnDefinition<ENTITY, FIELD> formula(String field) {
-        return formula(field, null, null);
+    public <ENTITY, FIELD> FormulaColumnDefinition<ENTITY, FIELD> formula(Class<?> fieldClass, String field) {
+        return formula(fieldClass, field, null, null);
     }
 }

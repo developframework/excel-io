@@ -113,7 +113,7 @@ public abstract class AbstractColumnDefinition<ENTITY, FIELD> implements ColumnD
      * @param cell 单元格
      * @return 单元格值
      */
-    protected Object getCellValue(Cell cell, Class<?> fieldClass) {
+    public Object getCellValue(Cell cell, Class<?> fieldClass) {
         final Object value;
         switch (cell.getCellType()) {
             case STRING:
@@ -158,7 +158,7 @@ public abstract class AbstractColumnDefinition<ENTITY, FIELD> implements ColumnD
      */
     @SuppressWarnings("unchecked")
     protected FIELD getEntityValue(ENTITY entity) {
-        return (FIELD) ExpressionUtils.getValue(entity, columnInfo.field);
+        return columnInfo.field == null ? null : (FIELD) ExpressionUtils.getValue(entity, columnInfo.field);
     }
 
     /**
@@ -173,10 +173,11 @@ public abstract class AbstractColumnDefinition<ENTITY, FIELD> implements ColumnD
 
     @Override
     public void configureCellStyle(Cell cell, CellStyleManager cellStyleManager, Object value) {
-        final String key;
+        String key = null;
         if (cellStyleKeyProvider != null) {
             key = cellStyleKeyProvider.apply(cell, value);
-        } else {
+        }
+        if (key == null) {
             key = determineCellStyleKey(cell, value);
         }
         cell.setCellStyle(cellStyleManager.getCellStyle(key));

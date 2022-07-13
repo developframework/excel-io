@@ -6,7 +6,7 @@ import org.apache.poi.ss.usermodel.Workbook;
 
 import java.util.Collections;
 import java.util.Map;
-import java.util.function.Consumer;
+import java.util.function.BiConsumer;
 
 /**
  * 表定义
@@ -44,10 +44,13 @@ public interface TableDefinition<ENTITY> {
     /**
      * 全局样式处理
      */
-    default Consumer<CellStyle> globalCellStylesHandle() {
+    default BiConsumer<Workbook, CellStyle> globalCellStylesHandle() {
         return null;
     }
 
+    /**
+     * 工作表扩展处理
+     */
     default SheetExtraHandler<?> sheetExtraHandler() {
         return null;
     }

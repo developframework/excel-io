@@ -19,11 +19,11 @@ public class Read {
                                 builder.<Student, Student.Gender>column("gender"),
                                 builder.<Student, LocalDate>column("birthday"),
                                 builder.<Student, LocalDateTime>column("createTime"),
-                                builder.<Student, LocalDate>column("chineseScore"),
-                                builder.<Student, LocalDate>column("mathScore"),
-                                builder.<Student, LocalDate>column("englishScore"),
-                                builder.<Student, Integer>formula("totalScore"),
-                                builder.<Student, Boolean>formula("qualified")
+                                builder.<Student, Integer>column("chineseScore"),
+                                builder.<Student, Integer>column("mathScore"),
+                                builder.<Student, Integer>column("englishScore"),
+                                builder.<Student, Integer>formula(Integer.class, "totalScore"),
+                                builder.<Student, Boolean>formula(String.class, "qualified")
                                         .readConvert((student, qualified) -> qualified.equals("合格"))
                         )
                 );

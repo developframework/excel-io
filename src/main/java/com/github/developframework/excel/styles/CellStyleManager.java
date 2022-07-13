@@ -6,7 +6,7 @@ import org.apache.poi.ss.usermodel.Workbook;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.function.Consumer;
+import java.util.function.BiConsumer;
 
 /**
  * 单元格样式管理器
@@ -18,19 +18,19 @@ public class CellStyleManager {
     private final Map<String, CellStyle> cellStyleMap = new HashMap<>();
 
     public CellStyleManager(Workbook workbook, TableDefinition<?> tableDefinition) {
-        final Consumer<CellStyle> globalConsumer = tableDefinition.globalCellStylesHandle();
-        registerCellStyle(globalConsumer, DefaultCellStyles.STYLE_NORMAL, DefaultCellStyles.normalCellStyle(workbook));
-        registerCellStyle(globalConsumer, DefaultCellStyles.STYLE_NORMAL_DATETIME, DefaultCellStyles.normalDateTimeCellStyle(workbook));
-        registerCellStyle(globalConsumer, DefaultCellStyles.STYLE_NORMAL_NUMBER, DefaultCellStyles.normalNumberCellStyle(workbook));
-        registerCellStyle(globalConsumer, DefaultCellStyles.STYLE_NORMAL_BOLD, DefaultCellStyles.normalBoldCellStyle(workbook));
+        final BiConsumer<Workbook, CellStyle> globalConsumer = tableDefinition.globalCellStylesHandle();
+        registerCellStyle(workbook, globalConsumer, DefaultCellStyles.STYLE_NORMAL, DefaultCellStyles.normalCellStyle(workbook));
+        registerCellStyle(workbook, globalConsumer, DefaultCellStyles.STYLE_NORMAL_DATETIME, DefaultCellStyles.normalDateTimeCellStyle(workbook));
+        registerCellStyle(workbook, globalConsumer, DefaultCellStyles.STYLE_NORMAL_NUMBER, DefaultCellStyles.normalNumberCellStyle(workbook));
+        registerCellStyle(workbook, globalConsumer, DefaultCellStyles.STYLE_NORMAL_BOLD, DefaultCellStyles.normalBoldCellStyle(workbook));
         tableDefinition
                 .customCellStyles(workbook)
-                .forEach((key, style) -> registerCellStyle(globalConsumer, key, style));
+                .forEach((key, style) -> registerCellStyle(workbook, globalConsumer, key, style));
     }
 
-    private void registerCellStyle(Consumer<CellStyle> globalConsumer, String key, CellStyle cellStyle) {
+    private void registerCellStyle(Workbook workbook, BiConsumer<Workbook, CellStyle> globalConsumer, String key, CellStyle cellStyle) {
         if (globalConsumer != null) {
-            globalConsumer.accept(cellStyle);
+            globalConsumer.accept(workbook, cellStyle);
         }
         cellStyleMap.put(key, cellStyle);
     }

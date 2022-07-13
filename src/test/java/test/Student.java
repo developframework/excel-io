@@ -2,6 +2,7 @@ package test;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import lombok.ToString;
 
 import java.time.LocalDate;
@@ -11,6 +12,7 @@ import java.time.LocalDateTime;
  * @author qiushui on 2022-06-28.
  */
 @Getter
+@Setter
 @NoArgsConstructor
 @ToString
 public class Student {
