@@ -93,7 +93,8 @@ File file = ExcelIO
 使用`excel-io`导入students数据
 
 ```java
-final List<Student> students = ExcelIO.reader("D:\\学生成绩表.xlsx")
+final List<Student> students = ExcelIO
+    .reader("D:\\学生成绩表.xlsx")
     .read(Student.class, (workbook, builder) ->
             builder.columnDefinitions(
                     builder.<Student, String>column("name"),
@@ -334,7 +335,7 @@ ExcelIO
             // 判定分数大于180
             final BiFunction<Cell, Object, String> totalKeyFunction = (cell, v) -> ((Integer) v) >= 180 ? null : "redColor";
             // 判定是否合格
-            final BiFunction<Cell, Object, String> passKeyFunction = (cell, v) -> v.equals("合格")? null : "redColor";
+            final BiFunction<Cell, Object, String> qualifiedKeyFunction = (cell, v) -> v.equals("合格")? null : "redColor";
             return builder.columnDefinitions(
                 builder.<Student, String>column("name", "学生姓名"),
                 builder.<Student, Student.Gender>column("gender", "性别"),
@@ -344,7 +345,7 @@ ExcelIO
                 builder.<Student, Integer>column("mathScore", "数学成绩").cellStyleKey(scoreKeyFunction),
                 builder.<Student, Integer>column("englishScore", "英语成绩").cellStyleKey(scoreKeyFunction),
                 builder.<Student, Integer>formula(Integer.class, "总成绩", "SUM(E{row}:G{row})").cellStyleKey(totalKeyFunction),
-                builder.<Student, String>formula(String.class, "是否合格", "IF(H{row} >= 180,\"合格\",\"不合格\")").cellStyleKey(passKeyFunction)
+                builder.<Student, String>formula(String.class, "是否合格", "IF(H{row} >= 180,\"合格\",\"不合格\")").cellStyleKey(qualifiedKeyFunction)
             );
         }
     }
