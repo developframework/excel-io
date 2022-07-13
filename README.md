@@ -80,7 +80,7 @@ File file = ExcelIO
             builder.<Student, Integer>column("mathScore","数学成绩"),
             builder.<Student, Integer>column("englishScore","英语成绩"),
             builder.<Student, Integer>formula("总成绩","SUM(E{row}:G{row})"),
-            builder.<Student, Boolean>formula("是否合格","=IF(H{row} >= 180,\"合格\",\"不合格\")")
+            builder.<Student, Boolean>formula("是否合格","IF(H{row} >= 180,\"合格\",\"不合格\")")
         )
     )
     .writeToFile("D:\\学生成绩表.xlsx");
