@@ -1,19 +1,14 @@
 package com.github.developframework.excel;
 
-import com.github.developframework.excel.column.BlankColumnDefinition;
 import com.github.developframework.excel.column.ColumnDefinitionBuilder;
 import com.github.developframework.excel.column.FormulaColumnDefinition;
+import com.github.developframework.excel.styles.CellStyleManager;
 import com.github.developframework.excel.styles.DefaultCellStyles;
-import com.github.developframework.expression.ExpressionUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.streaming.SXSSFSheet;
 
-import java.io.ByteArrayOutputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
+import java.io.*;
 import java.util.Arrays;
 import java.util.List;
 
@@ -34,7 +29,7 @@ public class ExcelWriter extends ExcelProcessor {
      * @param tableDefinition 表定义
      * @return 写出器
      */
-    public <ENTITY> ExcelWriter load(List<ENTITY> data, TableDefinition tableDefinition) {
+    public <ENTITY> ExcelWriter load(List<ENTITY> data, TableDefinition<ENTITY> tableDefinition) {
         writeInternal(tableDefinition, data);
         return this;
     }
@@ -46,7 +41,7 @@ public class ExcelWriter extends ExcelProcessor {
      * @param tableDefinition 表定义
      * @return 写出器
      */
-    public <ENTITY> ExcelWriter load(ENTITY[] data, TableDefinition tableDefinition) {
+    public <ENTITY> ExcelWriter load(ENTITY[] data, TableDefinition<ENTITY> tableDefinition) {
         writeInternal(tableDefinition, Arrays.asList(data));
         return this;
     }
@@ -68,9 +63,11 @@ public class ExcelWriter extends ExcelProcessor {
      *
      * @param filename 文件名
      */
-    public void writeToFile(String filename) {
-        try (OutputStream os = new FileOutputStream(filename)) {
+    public File writeToFile(String filename) {
+        File file = new File(filename);
+        try (OutputStream os = new FileOutputStream(file)) {
             write(os);
+            return file;
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -82,12 +79,9 @@ public class ExcelWriter extends ExcelProcessor {
      * @return 字节数组
      */
     public byte[] writeToByteArray() {
-        try {
-            ByteArrayOutputStream os = new ByteArrayOutputStream();
+        try (ByteArrayOutputStream os = new ByteArrayOutputStream()) {
             write(os);
-            byte[] bytes = os.toByteArray();
-            os.close();
-            return bytes;
+            return os.toByteArray();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -101,23 +95,51 @@ public class ExcelWriter extends ExcelProcessor {
      * @param <ENTITY>        实体类泛型
      */
     @SuppressWarnings({"unchecked", "rawtypes"})
-    private <ENTITY> void writeInternal(TableDefinition tableDefinition, List<ENTITY> list) {
-        final Sheet sheet = createSheet(tableDefinition);
-        ((SXSSFSheet) sheet).setRandomAccessWindowSize(-1);
-        final TableLocation tableLocation = tableDefinition.tableLocation();
-        PreparedTableDataHandler<ENTITY, ?> preparedTableDataHandler = (PreparedTableDataHandler<ENTITY, ?>) tableDefinition.preparedTableDataHandler();
-        final List<?> finalList = preparedTableDataHandler == null ? list : preparedTableDataHandler.handle(list);
-        final ColumnDefinition<?>[] columnDefinitions = tableDefinition.columnDefinitions(workbook, new ColumnDefinitionBuilder(workbook));
-        final int startColumnIndex = tableLocation.getColumn();
+    private <ENTITY> void writeInternal(TableDefinition<ENTITY> tableDefinition, List<ENTITY> list) {
+        final TableInfo tableInfo = tableDefinition.tableInfo();
 
-        int rowIndex = tableLocation.getRow();
-        if (tableDefinition.hasTitle() && tableDefinition.title() != null) {
-            createTableTitle(sheet, rowIndex++, startColumnIndex, tableDefinition.title(), columnDefinitions.length);
+        // 创建工作表
+        final Sheet sheet = createSheet(tableInfo);
+
+        // 列定义
+        final ColumnDefinition<ENTITY>[] columnDefinitions = tableDefinition.columnDefinitions(workbook, new ColumnDefinitionBuilder(workbook));
+
+        // 表位置
+        final int startColumnIndex = tableInfo.tableLocation.getColumn();
+        int rowIndex = tableInfo.tableLocation.getRow();
+
+        // 单元格样式管理器
+        final CellStyleManager cellStyleManager = new CellStyleManager(workbook, tableDefinition);
+
+        // 创建表头标题
+        if (tableInfo.hasTitle && tableInfo.title != null) {
+            createTableTitle(sheet, cellStyleManager, rowIndex++, startColumnIndex, tableInfo.title, columnDefinitions.length);
         }
-        if (tableDefinition.hasColumnHeader()) {
-            createTableColumnHeader(sheet, rowIndex++, startColumnIndex, columnDefinitions);
+        // 创建列头
+        if (tableInfo.hasColumnHeader) {
+            createTableColumnHeader(sheet, cellStyleManager, rowIndex++, startColumnIndex, columnDefinitions);
         }
-        createTableBody(sheet, rowIndex, startColumnIndex, columnDefinitions, finalList);
+
+        // 创建表主体数据
+        createTableBody(sheet, cellStyleManager, rowIndex, startColumnIndex, columnDefinitions, list);
+
+        // 设置列宽
+        for (int i = 0; i < columnDefinitions.length; i++) {
+            int col = startColumnIndex + i;
+            final ColumnInfo columnInfo = columnDefinitions[i].getColumnInfo();
+            if (columnInfo != null) {
+                if (columnInfo.columnWidth == null) {
+                    // 自动列宽
+                    sheet.autoSizeColumn(col);
+                    // 解决自动设置列宽中文失效的问题
+                    sheet.setColumnWidth(col, sheet.getColumnWidth(i) * 17 / 10);
+                } else {
+                    sheet.setColumnWidth(col, columnInfo.columnWidth * 256);
+                }
+            }
+        }
+
+        // 工作表额外处理
         SheetExtraHandler sheetExtraHandler = tableDefinition.sheetExtraHandler();
         if (sheetExtraHandler != null) {
             sheetExtraHandler.handle(workbook, sheet, rowIndex, rowIndex + list.size(), list);
@@ -127,31 +149,40 @@ public class ExcelWriter extends ExcelProcessor {
     /**
      * 创建工作表
      *
-     * @param tableDefinition 表定义
+     * @param tableInfo 表格信息
      * @return 工作表
      */
-    private Sheet createSheet(TableDefinition tableDefinition) {
-        if (tableDefinition.sheetName() == null) {
-            return workbook.createSheet();
+    private Sheet createSheet(TableInfo tableInfo) {
+        Sheet sheet;
+        if (tableInfo.sheetName == null) {
+            sheet = workbook.createSheet();
         } else {
-            return workbook.createSheet(tableDefinition.sheetName());
+            sheet = workbook.createSheet(tableInfo.sheetName);
         }
+        if (sheet instanceof SXSSFSheet) {
+            ((SXSSFSheet) sheet).setRandomAccessWindowSize(-1);
+            // 开启追踪列宽
+            ((SXSSFSheet) sheet).trackAllColumnsForAutoSizing();
+        }
+        return sheet;
     }
 
     /**
      * 创建表标题
      *
      * @param sheet            工作表
+     * @param cellStyleManager 单元格样式管理器
      * @param rowIndex         行索引
      * @param startColumnIndex 开始列索引
      * @param title            标题
      * @param columnSize       列数量
      */
-    private void createTableTitle(Sheet sheet, int rowIndex, final int startColumnIndex, String title, int columnSize) {
-        if (StringUtils.isNotEmpty(title)) {
+    private void createTableTitle(Sheet sheet, CellStyleManager cellStyleManager, int rowIndex, final int startColumnIndex, String title, int columnSize) {
+        if (title != null && !title.isBlank()) {
             Row titleRow = sheet.createRow(rowIndex);
+            final CellStyle cellStyle = cellStyleManager.getCellStyle(DefaultCellStyles.STYLE_NORMAL);
             for (int i = startColumnIndex; i < startColumnIndex + columnSize; i++) {
-                titleRow.createCell(i).setCellStyle(DefaultCellStyles.normalCellStyle(workbook));
+                titleRow.createCell(i).setCellStyle(cellStyle);
             }
             if (columnSize > 1) {
                 sheet.addMergedRegion(new CellRangeAddress(rowIndex, rowIndex, startColumnIndex, startColumnIndex + columnSize - 1));
@@ -164,23 +195,24 @@ public class ExcelWriter extends ExcelProcessor {
      * 创建列头
      *
      * @param sheet             工作表
+     * @param cellStyleManager  单元格样式管理器
      * @param rowIndex          列索引
      * @param startColumnIndex  开始列索引
      * @param columnDefinitions 列定义数组
      */
-    private void createTableColumnHeader(Sheet sheet, int rowIndex, final int startColumnIndex, ColumnDefinition<?>[] columnDefinitions) {
+    private <ENTITY> void createTableColumnHeader(Sheet sheet, CellStyleManager cellStyleManager, int rowIndex, final int startColumnIndex, ColumnDefinition<ENTITY>[] columnDefinitions) {
         Row headerRow = sheet.createRow(rowIndex);
-        CellStyle headerCellStyle = DefaultCellStyles.normalCellStyle(workbook);
+        final CellStyle headerCellStyle = cellStyleManager.getCellStyle(DefaultCellStyles.STYLE_NORMAL_BOLD);
+        ColumnDefinition<ENTITY> columnDefinition;
         for (int i = 0; i < columnDefinitions.length; i++) {
-            Cell headerCell = headerRow.createCell(startColumnIndex + i);
-            ColumnDefinition<?> columnDefinition = columnDefinitions[i];
-            if (columnDefinition == null) {
+            final Cell headerCell = headerRow.createCell(startColumnIndex + i);
+            columnDefinition = columnDefinitions[i];
+            if (columnDefinition == null || columnDefinition.getColumnInfo() == null) {
                 continue;
             }
+            final ColumnInfo columnInfo = columnDefinition.getColumnInfo();
             headerCell.setCellStyle(headerCellStyle);
-            if (columnDefinition.getHeader() != null) {
-                headerCell.setCellValue(columnDefinition.getHeader());
-            }
+            headerCell.setCellValue(columnInfo.header);
         }
     }
 
@@ -194,62 +226,22 @@ public class ExcelWriter extends ExcelProcessor {
      * @param list              实体列表
      * @param <ENTITY>          实体类泛型
      */
-    private <ENTITY> void createTableBody(Sheet sheet, int rowIndex, final int startColumnIndex, ColumnDefinition<?>[] columnDefinitions, List<ENTITY> list) {
-        // 默认单元格风格
-        final CellStyle DEFAULT_CELL_STYLE = DefaultCellStyles.normalCellStyle(workbook);
+    private <ENTITY> void createTableBody(Sheet sheet, CellStyleManager cellStyleManager, int rowIndex, final int startColumnIndex, ColumnDefinition<ENTITY>[] columnDefinitions, List<ENTITY> list) {
         // 渲染单元格
         for (int i = 0; i < list.size(); i++) {
             ENTITY entity = list.get(i);
             Row row = sheet.createRow(rowIndex + i);
             for (int j = 0; j < columnDefinitions.length; j++) {
-                Cell cell = row.createCell(startColumnIndex + j);
-                ColumnDefinition<?> columnDefinition = columnDefinitions[j];
-                if (columnDefinition == null || columnDefinition instanceof BlankColumnDefinition) {
-                    cell.setCellStyle(configCellStyle(columnDefinitions[j], DEFAULT_CELL_STYLE, null));
-                    continue;
-                }
-                Object fieldValue;
+                final ColumnDefinition<ENTITY> columnDefinition = columnDefinitions[j];
+                final Cell cell = row.createCell(startColumnIndex + j);
+                // 设置字段值
+                Object convertValue = columnDefinition.writeIntoCell(workbook, cell, entity);
                 if (columnDefinition instanceof FormulaColumnDefinition) {
-                    fieldValue = columnDefinition
-                            .getField()
-                            .replaceAll("\\{\\s*row\\s*}", String.valueOf(cell.getRowIndex() + 1))
-                            .replaceAll("\\{\\s*column\\s*}", String.valueOf(cell.getColumnIndex() + 1));
-                } else {
-                    fieldValue = ExpressionUtils.getValue(entity, columnDefinition.field);
+                    convertValue = ((FormulaColumnDefinition<?, ?>) columnDefinition).getCellValue(cell, null);
                 }
-                cell.setCellStyle(configCellStyle(columnDefinitions[j], DEFAULT_CELL_STYLE, fieldValue));
-                columnDefinition.writeIntoCell(entity, cell, fieldValue);
+                // 设置单元格样式
+                columnDefinition.configureCellStyle(cell, cellStyleManager, convertValue);
             }
         }
-        // 设置列宽
-        for (int i = 0; i < columnDefinitions.length; i++) {
-            if (columnDefinitions[i].columnWidth != null) {
-                sheet.setColumnWidth(startColumnIndex + i, columnDefinitions[i].columnWidth * 256);
-            }
-        }
-    }
-
-    /**
-     * 设置单元格风格
-     *
-     * @param columnDefinition 列定义
-     * @return 单元格风格
-     */
-    private CellStyle configCellStyle(ColumnDefinition<?> columnDefinition, CellStyle defaultCellStyle, Object value) {
-        CellStyle cellStyle = columnDefinition.cellStyleProvider == null ? defaultCellStyle : columnDefinition.cellStyleProvider.provide(workbook, defaultCellStyle, value);
-        if (columnDefinition.format != null) {
-            if (cellStyle == defaultCellStyle) {
-                cellStyle = DefaultCellStyles.normalCellStyle(workbook);
-            }
-            cellStyle.setDataFormat(workbook.createDataFormat().getFormat(columnDefinition.format));
-        }
-        if (columnDefinition.alignment != null) {
-            if (cellStyle == defaultCellStyle) {
-                cellStyle = DefaultCellStyles.normalCellStyle(workbook);
-            }
-            cellStyle.setAlignment(columnDefinition.alignment.getFirstValue());
-            cellStyle.setVerticalAlignment(columnDefinition.alignment.getSecondValue());
-        }
-        return cellStyle;
     }
 }
