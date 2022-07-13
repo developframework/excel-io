@@ -86,7 +86,7 @@ File file = ExcelIO
     .writeToFile("D:\\学生成绩表.xlsx");
 ```
 
-![](doc-images/1.jpg)
+![](doc-images/1.png)
 
 #### 从Excel读取数据
 
@@ -353,7 +353,7 @@ ExcelIO
 .writeToFile("D:\\学生成绩表.xlsx");
 ```
 
-![](doc-images/2.jpg)
+![](doc-images/2.png)
 
 ##### 全局单元格样式
 
