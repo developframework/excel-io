@@ -145,7 +145,7 @@ new TableDefinition<>() {
      * 全局单元格样式处理
      */
     @Override
-    public Consumer<CellStyle> globalCellStylesHandle() {
+    public BiConsumer<Workbook, CellStyle> globalCellStylesHandle() {
         return null;
     }
 
@@ -311,7 +311,7 @@ builder
 
 示例：
 
-将偶数单元格做灰色背景处理
+依靠单元格的值，将不合格的分数标红色背景
 
 ```java
 ExcelIO
