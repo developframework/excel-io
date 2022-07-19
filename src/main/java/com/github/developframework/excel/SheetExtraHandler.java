@@ -1,5 +1,6 @@
 package com.github.developframework.excel;
 
+import com.github.developframework.excel.styles.CellStyleManager;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 
@@ -12,5 +13,5 @@ import java.util.List;
  */
 public interface SheetExtraHandler<T> {
 
-    void handle(Workbook workbook, Sheet sheet, int firstRow, int lastRow, List<T> list);
+    void handle(Workbook workbook, Sheet sheet, CellStyleManager cellStyleManager, int firstRow, int lastRow, List<T> list);
 }

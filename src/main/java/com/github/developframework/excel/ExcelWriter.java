@@ -142,7 +142,7 @@ public class ExcelWriter extends ExcelProcessor {
         // 工作表额外处理
         SheetExtraHandler sheetExtraHandler = tableDefinition.sheetExtraHandler();
         if (sheetExtraHandler != null) {
-            sheetExtraHandler.handle(workbook, sheet, rowIndex, rowIndex + list.size(), list);
+            sheetExtraHandler.handle(workbook, sheet, cellStyleManager, rowIndex, rowIndex + list.size(), list);
         }
     }
 
