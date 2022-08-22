@@ -20,13 +20,14 @@ public final class DefaultCellStyles {
      */
     public static CellStyle normalCellStyle(Workbook workbook) {
         CellStyle cellStyle = workbook.createCellStyle();
-        // 细边框并文本垂直水平居中
+        // 细边框并文本垂直水平居中文本
         cellStyle.setBorderBottom(BorderStyle.THIN);
         cellStyle.setBorderLeft(BorderStyle.THIN);
         cellStyle.setBorderRight(BorderStyle.THIN);
         cellStyle.setBorderTop(BorderStyle.THIN);
         cellStyle.setAlignment(HorizontalAlignment.CENTER);
         cellStyle.setVerticalAlignment(VerticalAlignment.CENTER);
+        cellStyle.setDataFormat(workbook.createDataFormat().getFormat("@"));
         return cellStyle;
     }
 
