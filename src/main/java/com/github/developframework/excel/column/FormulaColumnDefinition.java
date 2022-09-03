@@ -4,6 +4,7 @@ import com.github.developframework.excel.AbstractColumnDefinition;
 import com.github.developframework.excel.ValueConvertUtils;
 import lombok.Getter;
 import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.CellValue;
 import org.apache.poi.ss.usermodel.FormulaEvaluator;
 
@@ -39,8 +40,10 @@ public class FormulaColumnDefinition<ENTITY, FIELD> extends AbstractColumnDefini
     public Object getCellValue(Cell cell, Class<?> fieldClass) {
         final CellValue cellValue = formulaEvaluator.evaluate(cell);
         switch (cellValue.getCellType()) {
-            case NUMERIC:
-                return ValueConvertUtils.doubleConvert(cellValue.getNumberValue(), this.fieldClass);
+            case NUMERIC: {
+                cell.setCellType(CellType.STRING);
+                return ValueConvertUtils.doubleConvert(cell.getStringCellValue(), this.fieldClass);
+            }
             case BOOLEAN:
                 return ValueConvertUtils.booleanConvert(cellValue.getBooleanValue(), this.fieldClass);
             case STRING:

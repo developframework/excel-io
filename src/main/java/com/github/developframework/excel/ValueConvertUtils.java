@@ -49,21 +49,21 @@ public class ValueConvertUtils {
         }
     }
 
-    public static Object doubleConvert(double value, Class<?> targetClass) {
+    public static Object doubleConvert(String value, Class<?> targetClass) {
         if (targetClass == Double.class || targetClass == Double.TYPE) {
             return value;
         } else if (targetClass == String.class) {
-            return Double.toString(value);
+            return value;
         } else if (targetClass == Integer.class || targetClass == Integer.TYPE) {
-            return (int) value;
+            return Integer.parseInt(value);
         } else if (targetClass == Long.class || targetClass == Long.TYPE) {
-            return (long) value;
+            return Long.parseLong(value);
         } else if (targetClass == Short.class || targetClass == Short.TYPE) {
-            return (short) value;
+            return Short.parseShort(value);
         } else if (targetClass == Float.class || targetClass == Float.TYPE) {
-            return (float) value;
+            return Float.parseFloat(value);
         } else if (targetClass == Boolean.class || targetClass == Boolean.TYPE) {
-            return value > 0;
+            return Integer.parseInt(value) > 0;
         } else {
             return value;
         }

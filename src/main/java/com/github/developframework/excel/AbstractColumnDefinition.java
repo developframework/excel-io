@@ -123,7 +123,8 @@ public abstract class AbstractColumnDefinition<ENTITY, FIELD> implements ColumnD
                 if (DateUtil.isCellDateFormatted(cell)) {
                     value = ValueConvertUtils.dateConvert(cell.getDateCellValue(), fieldClass);
                 } else {
-                    value = ValueConvertUtils.doubleConvert(cell.getNumericCellValue(), fieldClass);
+                    cell.setCellType(CellType.STRING);
+                    value = ValueConvertUtils.doubleConvert(cell.getStringCellValue(), fieldClass);
                 }
                 break;
             case BOOLEAN:
