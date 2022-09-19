@@ -1,7 +1,6 @@
 package com.github.developframework.excel;
 
 import com.github.developframework.excel.column.ColumnDefinitionBuilder;
-import com.github.developframework.excel.column.FormulaColumnDefinition;
 import com.github.developframework.excel.styles.CellStyleManager;
 import com.github.developframework.excel.styles.DefaultCellStyles;
 import org.apache.poi.ss.usermodel.*;
@@ -236,9 +235,9 @@ public class ExcelWriter extends ExcelProcessor {
                 final Cell cell = row.createCell(startColumnIndex + j);
                 // 设置字段值
                 Object convertValue = columnDefinition.writeIntoCell(workbook, cell, entity);
-                if (columnDefinition instanceof FormulaColumnDefinition) {
-                    convertValue = ((FormulaColumnDefinition<?, ?>) columnDefinition).getCellValue(cell, null);
-                }
+//                if (columnDefinition instanceof FormulaColumnDefinition) {
+//                    convertValue = ((FormulaColumnDefinition<?, ?>) columnDefinition).getCellValue(cell, null);
+//                }
                 // 设置单元格样式
                 columnDefinition.configureCellStyle(cell, cellStyleManager, convertValue);
             }

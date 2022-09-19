@@ -117,14 +117,14 @@ public abstract class AbstractColumnDefinition<ENTITY, FIELD> implements ColumnD
         final Object value;
         switch (cell.getCellType()) {
             case STRING:
-                value = ValueConvertUtils.stringConvert(cell.getRichStringCellValue().getString(), fieldClass);
+                value = ValueConvertUtils.stringConvert(cell.getRichStringCellValue().getString().trim(), fieldClass);
                 break;
             case NUMERIC:
                 if (DateUtil.isCellDateFormatted(cell)) {
                     value = ValueConvertUtils.dateConvert(cell.getDateCellValue(), fieldClass);
                 } else {
                     cell.setCellType(CellType.STRING);
-                    value = ValueConvertUtils.doubleConvert(cell.getStringCellValue(), fieldClass);
+                    value = ValueConvertUtils.doubleConvert(cell.getStringCellValue().trim(), fieldClass);
                 }
                 break;
             case BOOLEAN:

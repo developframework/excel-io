@@ -23,6 +23,7 @@ public class CellStyleManager {
         registerCellStyle(workbook, globalConsumer, DefaultCellStyles.STYLE_NORMAL_DATETIME, DefaultCellStyles.normalDateTimeCellStyle(workbook));
         registerCellStyle(workbook, globalConsumer, DefaultCellStyles.STYLE_NORMAL_NUMBER, DefaultCellStyles.normalNumberCellStyle(workbook));
         registerCellStyle(workbook, globalConsumer, DefaultCellStyles.STYLE_NORMAL_BOLD, DefaultCellStyles.normalBoldCellStyle(workbook));
+        registerCellStyle(workbook, globalConsumer, DefaultCellStyles.STYLE_NORMAL_PERCENT, DefaultCellStyles.normalPercentCellStyle(workbook));
         tableDefinition
                 .customCellStyles(workbook)
                 .forEach((key, style) -> registerCellStyle(workbook, globalConsumer, key, style));

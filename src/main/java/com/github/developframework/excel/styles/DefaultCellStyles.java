@@ -15,6 +15,8 @@ public final class DefaultCellStyles {
 
     public static final String STYLE_NORMAL_BOLD = "normalBold";
 
+    public static final String STYLE_NORMAL_PERCENT = "normalPercent";
+
     /**
      * 普通单元格风格
      */
@@ -46,6 +48,15 @@ public final class DefaultCellStyles {
     public static CellStyle normalDateTimeCellStyle(Workbook workbook) {
         final CellStyle cellStyle = normalCellStyle(workbook);
         cellStyle.setDataFormat(workbook.createDataFormat().getFormat("yyyy-mm-dd hh:mm:ss") /* Excel的占位符格式，并非写错 */);
+        return cellStyle;
+    }
+
+    /**
+     * 百分比
+     */
+    public static CellStyle normalPercentCellStyle(Workbook workbook) {
+        final CellStyle cellStyle = normalCellStyle(workbook);
+        cellStyle.setDataFormat(workbook.createDataFormat().getFormat("0.00%") /* Excel的占位符格式，并非写错 */);
         return cellStyle;
     }
 
