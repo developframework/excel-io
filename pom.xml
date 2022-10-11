@@ -82,11 +82,11 @@
     <distributionManagement>
         <snapshotRepository>
             <id>hclc aliyun nexus</id>
-            <url>http://121.41.211.172:8082/repository/maven-snapshots/</url>
+            <url>http://47.118.55.133:8082/repository/maven-snapshots/</url>
         </snapshotRepository>
         <repository>
             <id>hclc aliyun nexus</id>
-            <url>http://121.41.211.172:8082/repository/maven-releases/</url>
+            <url>http://47.118.55.133:8082/repository/maven-releases/</url>
         </repository>
     </distributionManagement>
 
