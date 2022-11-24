@@ -10,11 +10,15 @@ import org.apache.poi.ss.usermodel.*;
 public final class DefaultCellStyles {
 
     public static final String STYLE_NORMAL = "normal";
+
+    public static final String STYLE_NORMAL_TITLE = "normalTitle";
+
     public static final String STYLE_NORMAL_DATETIME = "normalDateTime";
     public static final String STYLE_NORMAL_NUMBER = "normalNumber";
 
     public static final String STYLE_NORMAL_BOLD = "normalBold";
 
+    public static final String STYLE_NORMAL_BOLD_HEADER = "normalBoldHeader";
     public static final String STYLE_NORMAL_PERCENT = "normalPercent";
 
     /**

@@ -20,9 +20,11 @@ public class CellStyleManager {
     public CellStyleManager(Workbook workbook, TableDefinition<?> tableDefinition) {
         final BiConsumer<Workbook, CellStyle> globalConsumer = tableDefinition.globalCellStylesHandle();
         registerCellStyle(workbook, globalConsumer, DefaultCellStyles.STYLE_NORMAL, DefaultCellStyles.normalCellStyle(workbook));
+        registerCellStyle(workbook, globalConsumer, DefaultCellStyles.STYLE_NORMAL_TITLE, DefaultCellStyles.normalCellStyle(workbook));
         registerCellStyle(workbook, globalConsumer, DefaultCellStyles.STYLE_NORMAL_DATETIME, DefaultCellStyles.normalDateTimeCellStyle(workbook));
         registerCellStyle(workbook, globalConsumer, DefaultCellStyles.STYLE_NORMAL_NUMBER, DefaultCellStyles.normalNumberCellStyle(workbook));
         registerCellStyle(workbook, globalConsumer, DefaultCellStyles.STYLE_NORMAL_BOLD, DefaultCellStyles.normalBoldCellStyle(workbook));
+        registerCellStyle(workbook, globalConsumer, DefaultCellStyles.STYLE_NORMAL_BOLD_HEADER, DefaultCellStyles.normalBoldCellStyle(workbook));
         registerCellStyle(workbook, globalConsumer, DefaultCellStyles.STYLE_NORMAL_PERCENT, DefaultCellStyles.normalPercentCellStyle(workbook));
         tableDefinition
                 .customCellStyles(workbook)

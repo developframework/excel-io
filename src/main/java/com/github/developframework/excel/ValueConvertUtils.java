@@ -18,34 +18,40 @@ public class ValueConvertUtils {
             return null;
         } else if (targetClass == String.class) {
             return value;
-        } else if (targetClass == Integer.class || targetClass == Integer.TYPE) {
-            return new BigDecimal(value).intValue();
-        } else if (targetClass == Long.class || targetClass == Long.TYPE) {
-            return new BigDecimal(value).longValue();
-        } else if (targetClass == BigDecimal.class) {
-            return new BigDecimal(value);
-        } else if (targetClass == Short.class || targetClass == Short.TYPE) {
-            return Short.parseShort(value);
-        } else if (targetClass == Float.class || targetClass == Float.TYPE) {
-            return Float.parseFloat(value);
-        } else if (targetClass == Double.class || targetClass == Double.TYPE) {
-            return Double.parseDouble(value);
-        } else if (targetClass == Boolean.class || targetClass == Boolean.TYPE) {
-            return Boolean.parseBoolean(value);
-        } else if (targetClass == java.util.Date.class) {
-            return Date.from((LocalDateTime.parse(value, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))).atZone(ZoneId.systemDefault()).toInstant());
-        } else if (targetClass == LocalDateTime.class) {
-            return LocalDateTime.parse(value, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
-        } else if (targetClass == ZonedDateTime.class) {
-            return ZonedDateTime.parse(value, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
-        } else if (targetClass == LocalDate.class) {
-            return LocalDate.parse(value);
-        } else if (targetClass == LocalTime.class) {
-            return LocalTime.parse(value);
-        } else if (targetClass.isEnum()) {
-            return Enum.valueOf((Class<Enum>) targetClass, value);
         } else {
-            return value;
+            try {
+                if (targetClass == Integer.class || targetClass == Integer.TYPE) {
+                    return new BigDecimal(value).intValue();
+                } else if (targetClass == Long.class || targetClass == Long.TYPE) {
+                    return new BigDecimal(value).longValue();
+                } else if (targetClass == BigDecimal.class) {
+                    return new BigDecimal(value);
+                } else if (targetClass == Short.class || targetClass == Short.TYPE) {
+                    return Short.parseShort(value);
+                } else if (targetClass == Float.class || targetClass == Float.TYPE) {
+                    return Float.parseFloat(value);
+                } else if (targetClass == Double.class || targetClass == Double.TYPE) {
+                    return Double.parseDouble(value);
+                } else if (targetClass == Boolean.class || targetClass == Boolean.TYPE) {
+                    return Boolean.parseBoolean(value);
+                } else if (targetClass == java.util.Date.class) {
+                    return Date.from((LocalDateTime.parse(value, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))).atZone(ZoneId.systemDefault()).toInstant());
+                } else if (targetClass == LocalDateTime.class) {
+                    return LocalDateTime.parse(value, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+                } else if (targetClass == ZonedDateTime.class) {
+                    return ZonedDateTime.parse(value, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+                } else if (targetClass == LocalDate.class) {
+                    return LocalDate.parse(value);
+                } else if (targetClass == LocalTime.class) {
+                    return LocalTime.parse(value);
+                } else if (targetClass.isEnum()) {
+                    return Enum.valueOf((Class<Enum>) targetClass, value);
+                } else {
+                    return value;
+                }
+            } catch (Exception e) {
+                return value;
+            }
         }
     }
 
