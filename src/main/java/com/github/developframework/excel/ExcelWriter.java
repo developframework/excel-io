@@ -122,6 +122,7 @@ public class ExcelWriter extends ExcelProcessor {
         // 创建表主体数据
         createTableBody(sheet, cellStyleManager, rowIndex, startColumnIndex, columnDefinitions, list);
 
+        final int maxWidth = 255 * 256;
         // 设置列宽
         for (int i = 0; i < columnDefinitions.length; i++) {
             int col = startColumnIndex + i;
@@ -131,9 +132,9 @@ public class ExcelWriter extends ExcelProcessor {
                     // 自动列宽
                     sheet.autoSizeColumn(col);
                     // 解决自动设置列宽中文失效的问题
-                    sheet.setColumnWidth(col, sheet.getColumnWidth(i) * 17 / 10);
+                    sheet.setColumnWidth(col, Math.min(maxWidth, sheet.getColumnWidth(i)));
                 } else {
-                    sheet.setColumnWidth(col, columnInfo.columnWidth * 256);
+                    sheet.setColumnWidth(col, Math.min(maxWidth, columnInfo.columnWidth * 256));
                 }
             }
         }
