@@ -23,6 +23,13 @@ public interface TableDefinition<ENTITY> {
     }
 
     /**
+     * 数据预处理器
+     */
+    default PreparedTableDataHandler<?> preparedTableDataHandler() {
+        return null;
+    }
+
+    /**
      * 列定义
      */
     ColumnDefinition<ENTITY>[] columnDefinitions(Workbook workbook, ColumnDefinitionBuilder builder);

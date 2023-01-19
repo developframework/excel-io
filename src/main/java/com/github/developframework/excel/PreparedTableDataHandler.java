@@ -6,9 +6,8 @@ import java.util.List;
  * 表数据预处理器
  *
  * @param <S>
- * @param <T>
  */
-public interface PreparedTableDataHandler<S, T> {
+public interface PreparedTableDataHandler<S> {
 
-    List<T> handle(List<S> source);
+    void handle(List<S> source);
 }

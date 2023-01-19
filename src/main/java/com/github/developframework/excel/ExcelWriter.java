@@ -95,6 +95,11 @@ public class ExcelWriter extends ExcelProcessor {
      */
     @SuppressWarnings({"unchecked", "rawtypes"})
     private <ENTITY> void writeInternal(TableDefinition<ENTITY> tableDefinition, List<ENTITY> list) {
+        final PreparedTableDataHandler<ENTITY> preparedTableDataHandler = (PreparedTableDataHandler<ENTITY>) tableDefinition.preparedTableDataHandler();
+        if (preparedTableDataHandler != null) {
+            preparedTableDataHandler.handle(list);
+        }
+
         final TableInfo tableInfo = tableDefinition.tableInfo();
 
         // 创建工作表
