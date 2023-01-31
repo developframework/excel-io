@@ -11,6 +11,7 @@ module excel.io {
 
     exports com.github.developframework.excel.column;
     exports com.github.developframework.excel.styles;
+    exports com.github.developframework.excel.utils;
     exports com.github.developframework.excel;
 
 }

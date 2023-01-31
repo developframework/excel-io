@@ -21,7 +21,7 @@ public interface ColumnDefinition<ENTITY> {
      *
      * @return 字段值
      */
-    default Object writeIntoCell(Workbook workbook, Cell cell, ENTITY entity) {
+    default Object writeIntoCell(Workbook workbook, Cell cell, ENTITY entity, int index) {
         return null;
     }
 

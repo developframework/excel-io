@@ -43,9 +43,10 @@ public abstract class AbstractColumnDefinition<ENTITY, FIELD> implements ColumnD
      * @param workbook 工作区
      * @param cell     单元格
      * @param entity   实体
+     * @param index    实体索引
      */
     @Override
-    public final Object writeIntoCell(Workbook workbook, Cell cell, ENTITY entity) {
+    public Object writeIntoCell(Workbook workbook, Cell cell, ENTITY entity, int index) {
         final FIELD fieldValue = getEntityValue(entity);
         final Object convertValue = writeConvertFunction == null ? fieldValue : writeConvertFunction.apply(entity, fieldValue);
         setCellValue(cell, convertValue);
@@ -61,7 +62,7 @@ public abstract class AbstractColumnDefinition<ENTITY, FIELD> implements ColumnD
      */
     @Override
     @SuppressWarnings("unchecked")
-    public final void readOutCell(Workbook workbook, Cell cell, ENTITY entity) {
+    public void readOutCell(Workbook workbook, Cell cell, ENTITY entity) {
         final Field field = FieldUtils.getDeclaredField(entity.getClass(), columnInfo.field, true);
         final Object cellValue = getCellValue(cell, field.getType());
         final FIELD convertValue = readConvertFunction == null ? (FIELD) cellValue : readConvertFunction.apply(entity, cellValue);

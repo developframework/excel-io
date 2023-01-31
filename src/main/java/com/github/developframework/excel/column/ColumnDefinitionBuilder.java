@@ -54,6 +54,21 @@ public class ColumnDefinitionBuilder {
     }
 
     /**
+     * 字面量列
+     *
+     * @param field  字段
+     * @param header 列名
+     * @return 字符串定义
+     */
+    public <ENTITY> LiteralColumnDefinition<ENTITY> literal(String field, String header) {
+        return new LiteralColumnDefinition<>(field, header);
+    }
+
+    public <ENTITY> LiteralColumnDefinition<ENTITY> literal(String field) {
+        return literal(field, null);
+    }
+
+    /**
      * 公式列
      *
      * @param formula 公式字符串
