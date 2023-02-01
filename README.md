@@ -72,15 +72,15 @@ File file = ExcelIO
     .writer(ExcelType.XLSX)
     .load(students,(workbook,builder)->
         builder.columnDefinitions(
-            builder.<Student, String>column("name","学生姓名"),
-            builder.<Student, Student.Gender>column("gender","性别"),
-            builder.<Student, LocalDate>column("birthday","生日"),
-            builder.<Student, LocalDateTime>column("createTime","入学时间"),
-            builder.<Student, Integer>column("chineseScore","语文成绩"),
-            builder.<Student, Integer>column("mathScore","数学成绩"),
-            builder.<Student, Integer>column("englishScore","英语成绩"),
-            builder.<Student, Integer>formula("总成绩","SUM(E{row}:G{row})"),
-            builder.<Student, Boolean>formula("是否合格","IF(H{row} >= 180,\"合格\",\"不合格\")")
+            builder.<String>column("name","学生姓名"),
+            builder.<Student.Gender>column("gender","性别"),
+            builder.<LocalDate>column("birthday","生日"),
+            builder.<LocalDateTime>column("createTime","入学时间"),
+            builder.<Integer>column("chineseScore","语文成绩"),
+            builder.<Integer>column("mathScore","数学成绩"),
+            builder.<Integer>column("englishScore","英语成绩"),
+            builder.<Integer>formula("总成绩","SUM(E{row}:G{row})"),
+            builder.<Boolean>formula("是否合格","IF(H{row} >= 180,\"合格\",\"不合格\")")
         )
     )
     .writeToFile("D:\\学生成绩表.xlsx");
@@ -97,15 +97,15 @@ final List<Student> students = ExcelIO
     .reader("D:\\学生成绩表.xlsx")
     .read(Student.class, (workbook, builder) ->
             builder.columnDefinitions(
-                    builder.<Student, String>column("name"),
-                    builder.<Student, Student.Gender>column("gender"),
-                    builder.<Student, LocalDate>column("birthday"),
-                    builder.<Student, LocalDateTime>column("createTime"),
-                    builder.<Student, Integer>column("chineseScore"),
-                    builder.<Student, Integer>column("mathScore"),
-                    builder.<Student, Integer>column("englishScore"),
-                    builder.<Student, Integer>formula(Integer.class, "totalScore"),
-                    builder.<Student, String>formula(String.class, "qualified")
+                    builder.<String>column("name"),
+                    builder.<Student.Gender>column("gender"),
+                    builder.<LocalDate>column("birthday"),
+                    builder.<LocalDateTime>column("createTime"),
+                    builder.<Integer>column("chineseScore"),
+                    builder.<Integer>column("mathScore"),
+                    builder.<Integer>column("englishScore"),
+                    builder.<Integer>formula(Integer.class, "totalScore"),
+                    builder.<String>formula(String.class, "qualified")
                             .readConvert((student, qualified) -> qualified.equals("合格"))
             )
     );
@@ -184,7 +184,7 @@ new TableDefinition<>() {
 ```java
 
 @Override
-public ColumnDefinition<Student>[] columnDefinitions(Workbook workbook, ColumnDefinitionBuilder builder) {
+public ColumnDefinition<Student>[] columnDefinitions(Workbook workbook, ColumnDefinitionBuilder<Student> builder) {
     return builder.columnDefinitions(
         builder.columnDefinitions(
             builder
@@ -203,6 +203,7 @@ public ColumnDefinition<Student>[] columnDefinitions(Workbook workbook, ColumnDe
 ```
 
 + `builder.column(...)`声明一个普通列
++ `builder.literal(...)`声明一个字面量列
 + `builder.blank(...)`声明一个空列
 + `builder.formula(...)`声明一个公式列
 
@@ -337,15 +338,15 @@ ExcelIO
             // 判定是否合格
             final BiFunction<Cell, Object, String> qualifiedKeyFunction = (cell, v) -> v.equals("合格")? null : "redColor";
             return builder.columnDefinitions(
-                builder.<Student, String>column("name", "学生姓名"),
-                builder.<Student, Student.Gender>column("gender", "性别"),
-                builder.<Student, LocalDate>column("birthday", "生日"),
-                builder.<Student, LocalDateTime>column("createTime", "入学时间"),
-                builder.<Student, Integer>column("chineseScore", "语文成绩").cellStyleKey(scoreKeyFunction),
-                builder.<Student, Integer>column("mathScore", "数学成绩").cellStyleKey(scoreKeyFunction),
-                builder.<Student, Integer>column("englishScore", "英语成绩").cellStyleKey(scoreKeyFunction),
-                builder.<Student, Integer>formula(Integer.class, "总成绩", "SUM(E{row}:G{row})").cellStyleKey(totalKeyFunction),
-                builder.<Student, String>formula(String.class, "是否合格", "IF(H{row} >= 180,\"合格\",\"不合格\")").cellStyleKey(qualifiedKeyFunction)
+                builder.<String>column("name", "学生姓名"),
+                builder.<Student.Gender>column("gender", "性别"),
+                builder.<LocalDate>column("birthday", "生日"),
+                builder.<LocalDateTime>column("createTime", "入学时间"),
+                builder.<Integer>column("chineseScore", "语文成绩").cellStyleKey(scoreKeyFunction),
+                builder.<Integer>column("mathScore", "数学成绩").cellStyleKey(scoreKeyFunction),
+                builder.<Integer>column("englishScore", "英语成绩").cellStyleKey(scoreKeyFunction),
+                builder.<Integer>formula(Integer.class, "总成绩", "SUM(E{row}:G{row})").cellStyleKey(totalKeyFunction),
+                builder.<String>formula(String.class, "是否合格", "IF(H{row} >= 180,\"合格\",\"不合格\")").cellStyleKey(qualifiedKeyFunction)
             );
         }
     }
