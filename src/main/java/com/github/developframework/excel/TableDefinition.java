@@ -35,7 +35,7 @@ public interface TableDefinition<ENTITY> {
     /**
      * 列定义
      */
-    ColumnDefinition<ENTITY>[] columnDefinitions(Workbook workbook, ColumnDefinitionBuilder builder);
+    ColumnDefinition<ENTITY>[] columnDefinitions(Workbook workbook, ColumnDefinitionBuilder<ENTITY> builder);
 
     /**
      * 每个处理
@@ -129,6 +129,7 @@ public interface TableDefinition<ENTITY> {
         // 渲染单元格
         for (int i = 0; i < list.size(); i++) {
             ENTITY entity = list.get(i);
+            each(entity);
             Row row = sheet.createRow(rowIndex + i);
             for (int j = 0; j < columnDefinitions.length; j++) {
                 final ColumnDefinition<ENTITY> columnDefinition = columnDefinitions[j];

@@ -42,7 +42,7 @@ public class Write {
                             }
 
                             @Override
-                            public ColumnDefinition<Student>[] columnDefinitions(Workbook workbook, ColumnDefinitionBuilder builder) {
+                            public ColumnDefinition<Student>[] columnDefinitions(Workbook workbook, ColumnDefinitionBuilder<Student> builder) {
                                 // 判定分数大于60
                                 final BiFunction<Cell, Object, String> scoreKeyFunction = (cell, v) -> ((Integer) v) >= 60 ? null : "redColor";
                                 // 判定分数大于180
@@ -50,15 +50,15 @@ public class Write {
                                 // 判定是否合格
                                 final BiFunction<Cell, Object, String> passKeyFunction = (cell, v) -> v.equals("合格") ? null : "redColor";
                                 return builder.columnDefinitions(
-                                        builder.<Student, String>column("name", "学生姓名"),
-                                        builder.<Student, Student.Gender>column("gender", "性别"),
-                                        builder.<Student, LocalDate>column("birthday", "生日"),
-                                        builder.<Student, LocalDateTime>column("createTime", "入学时间"),
-                                        builder.<Student, Integer>column("chineseScore", "语文成绩").cellStyleKey(scoreKeyFunction),
-                                        builder.<Student, Integer>column("mathScore", "数学成绩").cellStyleKey(scoreKeyFunction),
-                                        builder.<Student, Integer>column("englishScore", "英语成绩").cellStyleKey(scoreKeyFunction),
-                                        builder.<Student, Integer>formula(Integer.class, "总成绩", "SUM(E{row}:G{row})").cellStyleKey(totalKeyFunction),
-                                        builder.<Student, String>formula(String.class, "是否合格", "IF(H{row} >= 180,\"合格\",\"不合格\")").cellStyleKey(passKeyFunction)
+                                        builder.<String>column("name", "学生姓名"),
+                                        builder.<Student.Gender>column("gender", "性别"),
+                                        builder.<LocalDate>column("birthday", "生日"),
+                                        builder.<LocalDateTime>column("createTime", "入学时间"),
+                                        builder.<Integer>column("chineseScore", "语文成绩").cellStyleKey(scoreKeyFunction),
+                                        builder.<Integer>column("mathScore", "数学成绩").cellStyleKey(scoreKeyFunction),
+                                        builder.<Integer>column("englishScore", "英语成绩").cellStyleKey(scoreKeyFunction),
+                                        builder.<Integer>formula(Integer.class, "总成绩", "SUM(E{row}:G{row})").cellStyleKey(totalKeyFunction),
+                                        builder.<String>formula(String.class, "是否合格", "IF(H{row} >= 180,\"合格\",\"不合格\")").cellStyleKey(passKeyFunction)
                                 );
                             }
                         }

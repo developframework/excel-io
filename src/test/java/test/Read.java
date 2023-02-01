@@ -15,15 +15,15 @@ public class Read {
         final List<Student> students = ExcelIO.reader("D:\\学生成绩表.xlsx")
                 .read(Student.class, (workbook, builder) ->
                         builder.columnDefinitions(
-                                builder.<Student, String>column("name"),
-                                builder.<Student, Student.Gender>column("gender"),
-                                builder.<Student, LocalDate>column("birthday"),
-                                builder.<Student, LocalDateTime>column("createTime"),
-                                builder.<Student, Integer>column("chineseScore"),
-                                builder.<Student, Integer>column("mathScore"),
-                                builder.<Student, Integer>column("englishScore"),
-                                builder.<Student, Integer>formula(Integer.class, "totalScore"),
-                                builder.<Student, Boolean>formula(String.class, "qualified")
+                                builder.<String>column("name"),
+                                builder.<Student.Gender>column("gender"),
+                                builder.<LocalDate>column("birthday"),
+                                builder.<LocalDateTime>column("createTime"),
+                                builder.<Integer>column("chineseScore"),
+                                builder.<Integer>column("mathScore"),
+                                builder.<Integer>column("englishScore"),
+                                builder.<Integer>formula(Integer.class, "totalScore"),
+                                builder.<Boolean>formula(String.class, "qualified")
                                         .readConvert((student, qualified) -> qualified.equals("合格"))
                         )
                 );

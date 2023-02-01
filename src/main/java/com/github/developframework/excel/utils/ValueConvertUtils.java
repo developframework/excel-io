@@ -1,4 +1,4 @@
-package com.github.developframework.excel;
+package com.github.developframework.excel.utils;
 
 import java.math.BigDecimal;
 import java.time.*;
@@ -13,6 +13,7 @@ public class ValueConvertUtils {
     /**
      * 字符串转换
      */
+    @SuppressWarnings({"unchecked", "rawtypes"})
     public static Object stringConvert(String value, Class<?> targetClass) {
         if (value == null) {
             return null;

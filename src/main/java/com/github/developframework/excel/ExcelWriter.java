@@ -94,6 +94,8 @@ public class ExcelWriter extends ExcelProcessor {
      */
     @SuppressWarnings({"unchecked", "rawtypes"})
     private <ENTITY> void writeInternal(TableDefinition<ENTITY> tableDefinition, List<ENTITY> list) {
+
+        // 数据预处理
         final PreparedTableDataHandler<ENTITY> preparedTableDataHandler = (PreparedTableDataHandler<ENTITY>) tableDefinition.preparedTableDataHandler();
         if (preparedTableDataHandler != null) {
             preparedTableDataHandler.handle(list);
@@ -104,15 +106,15 @@ public class ExcelWriter extends ExcelProcessor {
         // 创建工作表
         final Sheet sheet = createSheet(tableInfo);
 
-        // 列定义
-        final ColumnDefinition<ENTITY>[] columnDefinitions = tableDefinition.columnDefinitions(workbook, new ColumnDefinitionBuilder(workbook));
-
         // 表位置
         final int startColumnIndex = tableInfo.tableLocation.getColumn();
         int rowIndex = tableInfo.tableLocation.getRow();
 
         // 单元格样式管理器
         final CellStyleManager cellStyleManager = new CellStyleManager(workbook, tableDefinition);
+
+        // 列定义
+        final ColumnDefinition<ENTITY>[] columnDefinitions = tableDefinition.columnDefinitions(workbook, new ColumnDefinitionBuilder<>(workbook));
 
         // 创建表头标题
         if (tableInfo.hasTitle && tableInfo.title != null) {
@@ -126,28 +128,14 @@ public class ExcelWriter extends ExcelProcessor {
         // 创建表主体数据
         tableDefinition.createTableBody(workbook, sheet, cellStyleManager, rowIndex, startColumnIndex, columnDefinitions, list);
 
-        final int maxWidth = 255 * 256;
-        // 设置列宽
-        for (int i = 0; i < columnDefinitions.length; i++) {
-            int col = startColumnIndex + i;
-            final ColumnInfo columnInfo = columnDefinitions[i].getColumnInfo();
-            if (columnInfo != null) {
-                if (columnInfo.columnWidth == null) {
-                    // 自动列宽
-                    sheet.autoSizeColumn(col);
-                    // 解决自动设置列宽中文失效的问题
-                    sheet.setColumnWidth(col, Math.min(maxWidth, sheet.getColumnWidth(i)));
-                } else {
-                    sheet.setColumnWidth(col, Math.min(maxWidth, columnInfo.columnWidth * 256));
-                }
-            }
-        }
-
         // 工作表额外处理
         SheetExtraHandler sheetExtraHandler = tableDefinition.sheetExtraHandler();
         if (sheetExtraHandler != null) {
             sheetExtraHandler.handle(workbook, sheet, cellStyleManager, rowIndex, rowIndex + list.size(), list);
         }
+
+        // 设置列宽
+        configureColumnWidth(columnDefinitions, sheet, startColumnIndex);
     }
 
     /**
@@ -169,5 +157,26 @@ public class ExcelWriter extends ExcelProcessor {
             ((SXSSFSheet) sheet).trackAllColumnsForAutoSizing();
         }
         return sheet;
+    }
+
+    /**
+     * 设置列宽
+     */
+    private <ENTITY> void configureColumnWidth(ColumnDefinition<ENTITY>[] columnDefinitions, Sheet sheet, int startColumnIndex) {
+        final int maxWidth = 255 * 256;
+        for (int i = 0; i < columnDefinitions.length; i++) {
+            int col = startColumnIndex + i;
+            final ColumnInfo columnInfo = columnDefinitions[i].getColumnInfo();
+            if (columnInfo != null) {
+                if (columnInfo.columnWidth == null) {
+                    // 自动列宽
+                    sheet.autoSizeColumn(col);
+                    // 解决自动设置列宽中文失效的问题
+                    sheet.setColumnWidth(col, Math.min(maxWidth, sheet.getColumnWidth(i)));
+                } else {
+                    sheet.setColumnWidth(col, Math.min(maxWidth, columnInfo.columnWidth * 256));
+                }
+            }
+        }
     }
 }

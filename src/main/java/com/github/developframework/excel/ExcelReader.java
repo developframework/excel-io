@@ -58,7 +58,7 @@ public class ExcelReader extends ExcelProcessor {
         int rowIndex = tableLocation.getRow() + (tableInfo.hasTitle ? 1 : 0) + (tableInfo.hasColumnHeader ? 1 : 0);
 
         // 列定义
-        final ColumnDefinition<ENTITY>[] columnDefinitions = tableDefinition.columnDefinitions(workbook, new ColumnDefinitionBuilder(workbook));
+        final ColumnDefinition<ENTITY>[] columnDefinitions = tableDefinition.columnDefinitions(workbook, new ColumnDefinitionBuilder<>(workbook));
         final int size = Math.min(readSize, totalSize);
         final List<ENTITY> list = new LinkedList<>();
         for (int i = 0; i < size; i++) {
