@@ -78,18 +78,6 @@
         </dependency>
     </dependencies>
 
-    <!-- 配置私库地址 -->
-    <distributionManagement>
-        <snapshotRepository>
-            <id>hclc aliyun nexus</id>
-            <url>http://47.118.55.133:8082/repository/maven-snapshots/</url>
-        </snapshotRepository>
-        <repository>
-            <id>hclc aliyun nexus</id>
-            <url>http://47.118.55.133:8082/repository/maven-releases/</url>
-        </repository>
-    </distributionManagement>
-
     <build>
         <plugins>
             <plugin>
