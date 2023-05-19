@@ -7,10 +7,8 @@ import com.github.developframework.expression.ExpressionUtils;
 import lombok.Getter;
 import lombok.SneakyThrows;
 import org.apache.commons.lang3.reflect.FieldUtils;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.CellType;
-import org.apache.poi.ss.usermodel.DateUtil;
-import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.xssf.usermodel.XSSFRichTextString;
 
 import java.lang.reflect.Field;
 import java.math.BigDecimal;
@@ -32,7 +30,9 @@ public abstract class AbstractColumnDefinition<ENTITY, FIELD> implements ColumnD
     protected BiFunction<ENTITY, FIELD, Object> writeConvertFunction;
     protected BiFunction<ENTITY, Object, FIELD> readConvertFunction;
 
-    protected BiFunction<Cell, Object, String> cellStyleKeyProvider;
+    protected CellStyleKeyProvider<ENTITY> cellStyleKeyProvider;
+
+    protected CellCommentInfo cellCommentInfo;
 
     public AbstractColumnDefinition(String field, String header) {
         this.columnInfo = new ColumnInfo(field, header == null ? field : header);
@@ -47,10 +47,25 @@ public abstract class AbstractColumnDefinition<ENTITY, FIELD> implements ColumnD
      * @param index    实体索引
      */
     @Override
-    public Object writeIntoCell(Workbook workbook, Cell cell, ENTITY entity, int index) {
+    public Object writeIntoCell(Workbook workbook, Sheet sheet, Cell cell, ENTITY entity, int index) {
         final FIELD fieldValue = getEntityValue(entity);
         final Object convertValue = writeConvertFunction == null ? fieldValue : writeConvertFunction.apply(entity, fieldValue);
         setCellValue(cell, convertValue);
+
+        if (cellCommentInfo != null) {
+            final Object c = ExpressionUtils.getValue(entity, cellCommentInfo.getCommentField());
+            final Object a = ExpressionUtils.getValue(entity, cellCommentInfo.getAuthorField());
+            if(c != null && a != null) {
+                Drawing drawing = sheet.createDrawingPatriarch();
+                final ClientAnchor anchor = cellCommentInfo.getAnchorFunction().apply(drawing, cell);
+                anchor.setAnchorType(ClientAnchor.AnchorType.MOVE_DONT_RESIZE);
+                Comment comment = drawing.createCellComment(anchor);
+                comment.setString(new XSSFRichTextString(c.toString()));
+                comment.setAuthor(a.toString());
+                cell.setCellComment(comment);
+            }
+        }
+
         return convertValue;
     }
 
@@ -175,10 +190,10 @@ public abstract class AbstractColumnDefinition<ENTITY, FIELD> implements ColumnD
     }
 
     @Override
-    public void configureCellStyle(Cell cell, CellStyleManager cellStyleManager, Object value) {
+    public void configureCellStyle(Cell cell, CellStyleManager cellStyleManager, ENTITY entity, Object value) {
         String key = null;
         if (cellStyleKeyProvider != null) {
-            key = cellStyleKeyProvider.apply(cell, value);
+            key = cellStyleKeyProvider.provideCellStyleKey(cell, entity, value);
         }
         if (key == null) {
             key = determineCellStyleKey(cell, value);
@@ -211,8 +226,13 @@ public abstract class AbstractColumnDefinition<ENTITY, FIELD> implements ColumnD
         return this;
     }
 
-    public AbstractColumnDefinition<ENTITY, FIELD> cellStyleKey(BiFunction<Cell, Object, String> cellStyleKeyProvider) {
+    public AbstractColumnDefinition<ENTITY, FIELD> cellStyleKey(CellStyleKeyProvider<ENTITY> cellStyleKeyProvider) {
         this.cellStyleKeyProvider = cellStyleKeyProvider;
+        return this;
+    }
+
+    public AbstractColumnDefinition<ENTITY, FIELD> comment(String author, String commentField, BiFunction<Drawing, Cell, ClientAnchor> anchorFunction) {
+        this.cellCommentInfo = new CellCommentInfo(author, commentField, anchorFunction);
         return this;
     }
 }

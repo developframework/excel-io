@@ -135,12 +135,12 @@ public interface TableDefinition<ENTITY> {
                 final ColumnDefinition<ENTITY> columnDefinition = columnDefinitions[j];
                 final Cell cell = row.createCell(startColumnIndex + j);
                 // 设置字段值
-                Object convertValue = columnDefinition.writeIntoCell(workbook, cell, entity, i);
+                Object convertValue = columnDefinition.writeIntoCell(workbook, sheet, cell, entity, i);
 //                if (columnDefinition instanceof FormulaColumnDefinition) {
 //                    convertValue = ((FormulaColumnDefinition<?, ?>) columnDefinition).getCellValue(cell, null);
 //                }
                 // 设置单元格样式
-                columnDefinition.configureCellStyle(cell, cellStyleManager, convertValue);
+                columnDefinition.configureCellStyle(cell, cellStyleManager, entity, convertValue);
             }
         }
     }

@@ -1,8 +1,11 @@
 package com.github.developframework.excel.column;
 
 import com.github.developframework.excel.ColumnDefinition;
+import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.FormulaEvaluator;
 import org.apache.poi.ss.usermodel.Workbook;
+
+import java.util.function.Function;
 
 /**
  * 列定义构建器
@@ -79,14 +82,25 @@ public class ColumnDefinitionBuilder<ENTITY> {
         if (formulaEvaluator == null) {
             formulaEvaluator = workbook.getCreationHelper().createFormulaEvaluator();
         }
-        return new FormulaColumnDefinition<>(formulaEvaluator, field, header, formula, fieldClass);
+        return new FormulaColumnDefinition<>(formulaEvaluator, field, header, formula, null, fieldClass);
     }
 
     public <FIELD> FormulaColumnDefinition<ENTITY, FIELD> formula(Class<?> fieldClass, String header, String formula) {
         return formula(fieldClass, null, header, formula);
     }
 
+    public <FIELD> FormulaColumnDefinition<ENTITY, FIELD> formula(Class<?> fieldClass, String field, String header, Function<Cell, String> formulaFunction) {
+        if (formulaEvaluator == null) {
+            formulaEvaluator = workbook.getCreationHelper().createFormulaEvaluator();
+        }
+        return new FormulaColumnDefinition<>(formulaEvaluator, field, header, null, formulaFunction, fieldClass);
+    }
+
+    public <FIELD> FormulaColumnDefinition<ENTITY, FIELD> formula(Class<?> fieldClass, String header, Function<Cell, String> formulaFunction) {
+        return formula(fieldClass, null, header, formulaFunction);
+    }
+
     public <FIELD> FormulaColumnDefinition<ENTITY, FIELD> formula(Class<?> fieldClass, String field) {
-        return formula(fieldClass, field, null, null);
+        return formula(fieldClass, field, null, (String) null);
     }
 }

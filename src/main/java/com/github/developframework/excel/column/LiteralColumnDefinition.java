@@ -2,6 +2,7 @@ package com.github.developframework.excel.column;
 
 import com.github.developframework.excel.AbstractColumnDefinition;
 import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 
 /**
@@ -17,7 +18,7 @@ public class LiteralColumnDefinition<ENTITY> extends AbstractColumnDefinition<EN
     }
 
     @Override
-    public Object writeIntoCell(Workbook workbook, Cell cell, ENTITY entity, int index) {
+    public Object writeIntoCell(Workbook workbook, Sheet sheet, Cell cell, ENTITY entity, int index) {
         final Object v;
         if (literal.equals("{no}")) {
             v = index + 1;

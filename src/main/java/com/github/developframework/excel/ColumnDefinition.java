@@ -2,6 +2,7 @@ package com.github.developframework.excel;
 
 import com.github.developframework.excel.styles.CellStyleManager;
 import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 
 /**
@@ -21,7 +22,7 @@ public interface ColumnDefinition<ENTITY> {
      *
      * @return 字段值
      */
-    default Object writeIntoCell(Workbook workbook, Cell cell, ENTITY entity, int index) {
+    default Object writeIntoCell(Workbook workbook, Sheet sheet, Cell cell, ENTITY entity, int index) {
         return null;
     }
 
@@ -34,6 +35,6 @@ public interface ColumnDefinition<ENTITY> {
     /**
      * 配置单元格格式
      */
-    default void configureCellStyle(Cell cell, CellStyleManager cellStyleManager, Object value) {
+    default void configureCellStyle(Cell cell, CellStyleManager cellStyleManager, ENTITY entity, Object value) {
     }
 }
