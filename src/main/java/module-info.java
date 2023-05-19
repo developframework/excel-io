@@ -8,6 +8,7 @@ module excel.io {
     requires poi;
     requires poi.ooxml;
     requires org.slf4j;
+    requires java.desktop;
 
     exports com.github.developframework.excel.column;
     exports com.github.developframework.excel.styles;
