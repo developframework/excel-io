@@ -1,7 +1,6 @@
 package com.github.developframework.excel.styles;
 
 import lombok.Getter;
-import lombok.Setter;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFCellStyle;
@@ -24,7 +23,9 @@ public class CellStyleKey {
     private static final Class<?>[] ITEM_KEY_CLASSES = new Class[]{
             FontKey.class,
             AlignmentKey.class,
-            ForegroundKey.class
+            ForegroundKey.class,
+            BorderKey.class,
+            DataFormatKey.class
     };
 
     private final List<ItemKey> itemKeys = new LinkedList<>();
@@ -74,7 +75,6 @@ public class CellStyleKey {
     }
 
     @Getter
-    @Setter
     @Prefix({"font#", "f#"})
     protected static class FontKey implements ItemKey {
 
@@ -111,19 +111,19 @@ public class CellStyleKey {
             final String[] parts = key.split("-");
             for (String part : parts) {
                 if (StringUtils.isNumeric(part)) {
-                    fontKey.setHeightInPoints(Short.parseShort(part));
+                    fontKey.heightInPoints = Short.parseShort(part);
                 } else if (part.equalsIgnoreCase("italic")) {
-                    fontKey.setItalic(true);
+                    fontKey.italic = true;
                 } else if (part.equalsIgnoreCase("bold")) {
-                    fontKey.setBold(true);
+                    fontKey.bold = true;
                 } else if (part.startsWith("#")) {
                     final int rgb = Integer.valueOf(part.substring(1), 16);
                     int r = rgb >> 16;
                     int g = (rgb & 0x00ff00) >> 8;
                     int b = rgb & 0x0000ff;
-                    fontKey.setXssfColor(new XSSFColor(new java.awt.Color(r, g, b)));
+                    fontKey.xssfColor = new XSSFColor(new java.awt.Color(r, g, b));
                 } else {
-                    fontKey.setFontName(part);
+                    fontKey.fontName = part;
                 }
             }
             return fontKey;
@@ -131,7 +131,6 @@ public class CellStyleKey {
     }
 
     @Getter
-    @Setter
     @Prefix({"align#", "a#"})
     protected static class AlignmentKey implements ItemKey {
 
@@ -150,9 +149,9 @@ public class CellStyleKey {
             final String[] parts = key.split("-");
             for (String part : parts) {
                 if (part.startsWith("v:")) {
-                    alignmentKey.setVerticalAlignment(VerticalAlignment.valueOf(part.substring(2).toUpperCase()));
+                    alignmentKey.verticalAlignment = VerticalAlignment.valueOf(part.substring(2).toUpperCase());
                 } else if (part.startsWith("h:")) {
-                    alignmentKey.setHorizontalAlignment(HorizontalAlignment.valueOf(part.substring(2).toUpperCase()));
+                    alignmentKey.horizontalAlignment = HorizontalAlignment.valueOf(part.substring(2).toUpperCase());
                 }
             }
             return alignmentKey;
@@ -160,7 +159,6 @@ public class CellStyleKey {
     }
 
     @Getter
-    @Setter
     @Prefix({"foreground#", "fg#"})
     protected static class ForegroundKey implements ItemKey {
 
@@ -188,12 +186,72 @@ public class CellStyleKey {
                     int r = rgb >> 16;
                     int g = (rgb & 0x00ff00) >> 8;
                     int b = rgb & 0x0000ff;
-                    foregroundKey.setXssfColor(new XSSFColor(new java.awt.Color(r, g, b)));
+                    foregroundKey.xssfColor = new XSSFColor(new java.awt.Color(r, g, b));
                 } else {
-                    foregroundKey.setFillPatternType(FillPatternType.valueOf(key.toUpperCase()));
+                    foregroundKey.fillPatternType = FillPatternType.valueOf(part.toUpperCase());
                 }
             }
             return foregroundKey;
+        }
+    }
+
+    @Getter
+    @Prefix({"border#", "b#"})
+    protected static class BorderKey implements ItemKey {
+
+        private BorderStyle borderStyle;
+
+        private XSSFColor xssfColor;
+
+        @Override
+        public void configureCellStyle(Workbook workbook, CellStyle cellStyle) {
+            cellStyle.setBorderTop(borderStyle);
+            cellStyle.setBorderRight(borderStyle);
+            cellStyle.setBorderBottom(borderStyle);
+            cellStyle.setBorderLeft(borderStyle);
+
+            if (cellStyle instanceof XSSFCellStyle) {
+                XSSFCellStyle xssfCellStyle = (XSSFCellStyle) cellStyle;
+                xssfCellStyle.setTopBorderColor(xssfColor);
+                xssfCellStyle.setRightBorderColor(xssfColor);
+                xssfCellStyle.setBottomBorderColor(xssfColor);
+                xssfCellStyle.setLeftBorderColor(xssfColor);
+            }
+        }
+
+        public static BorderKey of(String key) {
+            BorderKey borderKey = new BorderKey();
+            final String[] parts = key.split("-");
+            for (String part : parts) {
+                if (part.startsWith("#")) {
+                    final int rgb = Integer.valueOf(part.substring(1), 16);
+                    int r = rgb >> 16;
+                    int g = (rgb & 0x00ff00) >> 8;
+                    int b = rgb & 0x0000ff;
+                    borderKey.xssfColor = new XSSFColor(new java.awt.Color(r, g, b));
+                } else {
+                    borderKey.borderStyle = BorderStyle.valueOf(part.toUpperCase());
+                }
+            }
+            return borderKey;
+        }
+    }
+
+    @Getter
+    @Prefix({"dataFormat#", "df#"})
+    protected static class DataFormatKey implements ItemKey {
+
+        private String format;
+
+        @Override
+        public void configureCellStyle(Workbook workbook, CellStyle cellStyle) {
+            cellStyle.setDataFormat(workbook.createDataFormat().getFormat(format));
+        }
+
+        public static DataFormatKey of(String key) {
+            DataFormatKey dataFormatKey = new DataFormatKey();
+            dataFormatKey.format = key;
+            return dataFormatKey;
         }
     }
 }
