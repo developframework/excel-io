@@ -6,6 +6,7 @@ import com.github.developframework.excel.utils.ValueConvertUtils;
 import com.github.developframework.expression.ExpressionUtils;
 import lombok.Getter;
 import lombok.SneakyThrows;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.reflect.FieldUtils;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFRichTextString;
@@ -191,29 +192,29 @@ public abstract class AbstractColumnDefinition<ENTITY, FIELD> implements ColumnD
 
     @Override
     public void configureCellStyle(Cell cell, CellStyleManager cellStyleManager, ENTITY entity, Object value) {
-        String key = null;
+        String cellStyleKey = null;
         if (cellStyleKeyProvider != null) {
-            key = cellStyleKeyProvider.provideCellStyleKey(cell, entity, value);
+            cellStyleKey = cellStyleKeyProvider.provideCellStyleKey(cell, entity, value);
         }
-        if (key == null) {
-            key = determineCellStyleKey(cell, value);
+        if (StringUtils.isEmpty(cellStyleKey)) {
+            cellStyleKey = determineCellStyleKey(cell, value);
         }
-        cell.setCellStyle(cellStyleManager.getCellStyle(key));
+        cell.setCellStyle(cellStyleManager.getCellStyle(cellStyleKey));
     }
 
     /**
-     * 决定单元格格式键
+     * 根据值决定单元格格式键
      */
     protected String determineCellStyleKey(Cell cell, Object value) {
         if (cell.getCellType() == CellType.NUMERIC) {
             final Class<?> valueClass = value.getClass();
             if (valueClass == LocalDateTime.class || valueClass == ZonedDateTime.class || valueClass == java.util.Date.class) {
-                return DefaultCellStyles.STYLE_NORMAL_DATETIME;
+                return DefaultCellStyles.STYLE_BODY_DATETIME;
             } else if (Number.class.isAssignableFrom(valueClass)) {
-                return DefaultCellStyles.STYLE_NORMAL_NUMBER;
+                return DefaultCellStyles.STYLE_BODY_NUMBER;
             }
         }
-        return DefaultCellStyles.STYLE_NORMAL;
+        return DefaultCellStyles.STYLE_BODY;
     }
 
     public AbstractColumnDefinition<ENTITY, FIELD> writeConvert(BiFunction<ENTITY, FIELD, Object> writeConvertFunction) {

@@ -11,75 +11,117 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * @author qiushui on 2023-05-19.
  */
-public class CellStyleKey {
+public class CellStyleKey implements ItemKey {
 
     @SuppressWarnings("unchecked")
     private static final Class<? extends ItemKey>[] ITEM_KEY_CLASSES = new Class[]{
-            FontKey.class,
             AlignmentKey.class,
-            ForegroundKey.class,
             BorderKey.class,
-            DataFormatKey.class
+            ConfigKey.class,
+            DataFormatKey.class,
+            FontKey.class,
+            ForegroundKey.class
     };
 
     private final List<ItemKey> itemKeys = new LinkedList<>();
 
+    @Override
+    public void configureCellStyle(Workbook workbook, CellStyle cellStyle) {
+        for (ItemKey itemKey : itemKeys) {
+            itemKey.configureCellStyle(workbook, cellStyle);
+        }
+    }
+
+    @Override
+    public String toString() {
+        return itemKeys
+                .stream()
+                .sorted(Comparator.comparing(ik -> ik.getClass().getSimpleName()))
+                .map(ItemKey::toString)
+                .filter(s -> !s.endsWith("{}"))
+                .collect(Collectors.joining(" "));
+    }
+
     public static boolean isCellStyleKey(String key) {
-        return key.matches("^(\\s*\\w+\\s*\\{(.+?)*}\\s*)+$");
+        return key.isEmpty() || key.matches("^(\\s*\\w+\\s*\\{(.+?)*}\\s*)+$");
     }
 
     public static CellStyleKey parse(String key) {
         final CellStyleKey cellStyleKey = new CellStyleKey();
         final Map<Class<? extends ItemKey>, Map<String, String>> itemKeyMetadataMap = disassembleItemKey(key);
 
-        itemKeyMetadataMap.forEach((itemKeyClass, properties) -> {
+        for (Class<? extends ItemKey> itemKeyClass : ITEM_KEY_CLASSES) {
+            final Map<String, String> properties = itemKeyMetadataMap.getOrDefault(itemKeyClass, Collections.emptyMap());
             try {
                 cellStyleKey.itemKeys.add(
                         itemKeyClass.getConstructor(Map.class).newInstance(properties)
                 );
             } catch (Exception e) {
-                throw new RuntimeException(e);
+                e.printStackTrace();
             }
-        });
+        }
         return cellStyleKey;
     }
 
     private static Map<Class<? extends ItemKey>, Map<String, String>> disassembleItemKey(String key) {
-        final char[] charArray = StringUtils.deleteWhitespace(key).toCharArray();
+        final char[] charArray = key.toCharArray();
         final StringBuilder itemKeyNameBuilder = new StringBuilder();
         final StringBuilder propertiesBuilder = new StringBuilder();
         final Map<Class<? extends ItemKey>, Map<String, String>> map = new HashMap<>();
 
         boolean inner = false;
+        boolean quote = false;
         Class<? extends ItemKey> itemKeyClass = null;
         for (char c : charArray) {
-            if (c == '{') {
-                if(inner) {
-                    throw new IllegalArgumentException("item key is valid");
+            switch (c) {
+                case ' ':
+                case '\t':
+                case '\n': {
+                    if (quote) {
+                        propertiesBuilder.append(c);
+                    } else {
+                        continue;
+                    }
                 }
-                inner = true;
-                itemKeyClass = determineItemKey(itemKeyNameBuilder.toString());
-                itemKeyNameBuilder.setLength(0);
-            } else if (c == '}') {
-                if(!inner) {
-                    throw new IllegalArgumentException("item key is valid");
+                break;
+                case '\'': {
+                    quote = !quote;
+                    propertiesBuilder.append(c);
                 }
-                inner = false;
-                map.put(itemKeyClass, disassembleProperties(propertiesBuilder.toString()));
-                itemKeyClass = null;
-                propertiesBuilder.setLength(0);
-            } else if (inner) {
-                propertiesBuilder.append(c);
-            } else {
-                itemKeyNameBuilder.append(c);
+                break;
+                case '{': {
+                    if (inner) {
+                        throw new IllegalArgumentException("item key is valid");
+                    }
+                    inner = true;
+                    itemKeyClass = determineItemKey(itemKeyNameBuilder.toString());
+                    itemKeyNameBuilder.setLength(0);
+                }
+                break;
+                case '}': {
+                    if (!inner) {
+                        throw new IllegalArgumentException("item key is valid");
+                    }
+                    inner = false;
+                    map.put(itemKeyClass, disassembleProperties(propertiesBuilder.toString()));
+                    itemKeyClass = null;
+                    propertiesBuilder.setLength(0);
+                }
+                break;
+                default: {
+                    if (inner) {
+                        propertiesBuilder.append(c);
+                    } else {
+                        itemKeyNameBuilder.append(c);
+                    }
+                }
+                break;
             }
         }
         return map;
@@ -92,11 +134,11 @@ public class CellStyleKey {
             if (part.isEmpty()) {
                 continue;
             }
-            final String[] kv = part.split(":");
-            if (kv.length == 1) {
-                map.put(kv[0], part);
+            final int i = part.indexOf(":");
+            if (i == -1) {
+                map.put(part, "true");
             } else {
-                map.put(kv[0], kv[1]);
+                map.put(part.substring(0, i), StringUtils.strip(part.substring(i + 1), "'"));
             }
         }
         return map;
@@ -114,23 +156,6 @@ public class CellStyleKey {
         throw new IllegalArgumentException("unknown item key \"" + itemKeyName + "\"");
     }
 
-    public abstract static class ItemKey {
-
-        public ItemKey(Map<String, String> properties) {
-
-        }
-
-        protected abstract void configureCellStyle(Workbook workbook, CellStyle cellStyle);
-
-        protected final java.awt.Color getColorFromRGB(String rgbStr) {
-            final int rgb = Integer.valueOf(rgbStr.substring(1), 16);
-            int r = rgb >> 16;
-            int g = (rgb & 0x00ff00) >> 8;
-            int b = rgb & 0x0000ff;
-            return new java.awt.Color(r, g, b);
-        }
-    }
-
     @Retention(RetentionPolicy.RUNTIME)
     @Target(ElementType.TYPE)
     public @interface ItemKeySign {
@@ -141,13 +166,15 @@ public class CellStyleKey {
     // font {size: 16; bold; italic; family: 宋体; color: #ffaaee}
     @Getter
     @ItemKeySign({"font", "f"})
-    protected static class FontKey extends ItemKey {
+    protected static class FontKey extends AbstractItemKey {
 
-        private short heightInPoints;
+        private short size;
 
         private XSSFColor xssfColor;
 
-        private String fontName;
+        private String color;
+
+        private String family;
 
         private boolean italic;
 
@@ -156,13 +183,14 @@ public class CellStyleKey {
         public FontKey(Map<String, String> properties) {
             super(properties);
             if (properties.containsKey("size")) {
-                heightInPoints = Short.parseShort(properties.get("size"));
+                size = Short.parseShort(properties.get("size"));
             }
             if (properties.containsKey("color")) {
-                xssfColor = new XSSFColor(getColorFromRGB(properties.get("color")));
+                color = properties.get("color");
+                xssfColor = new XSSFColor(getColorFromRGB(color));
             }
             if (properties.containsKey("family")) {
-                fontName = properties.get("family");
+                family = properties.get("family");
             }
             if (properties.containsKey("italic")) {
                 italic = Boolean.parseBoolean(properties.get("italic"));
@@ -175,22 +203,49 @@ public class CellStyleKey {
         @Override
         public void configureCellStyle(Workbook workbook, CellStyle cellStyle) {
             final Font font = workbook.createFont();
-            font.setFontName(fontName);
-            font.setFontHeightInPoints(heightInPoints);
+            if (family != null) {
+                font.setFontName(family);
+            }
+            if (size != 0) {
+                font.setFontHeightInPoints(size);
+            }
             font.setItalic(italic);
             font.setBold(bold);
 
-            if (font instanceof XSSFFont) {
-                ((XSSFFont) font).setColor(xssfColor);
+            if(xssfColor != null) {
+                if (font instanceof XSSFFont) {
+                    ((XSSFFont) font).setColor(xssfColor);
+                }
             }
             cellStyle.setFont(font);
+        }
+
+        @Override
+        public String toString() {
+            List<String> list = new LinkedList<>();
+            if (size != 0) {
+                list.add("size: " + size);
+            }
+            if (color != null) {
+                list.add("color: " + color);
+            }
+            if (family != null) {
+                list.add("family: '" + family + "'");
+            }
+            if (italic) {
+                list.add("italic");
+            }
+            if (bold) {
+                list.add("bold");
+            }
+            return String.format("font {%s}", StringUtils.join(list, "; "));
         }
     }
 
     // align {vertical: right; horizontal: center}
     @Getter
     @ItemKeySign({"align", "a"})
-    protected static class AlignmentKey extends ItemKey {
+    protected static class AlignmentKey extends AbstractItemKey {
 
         private HorizontalAlignment horizontalAlignment = HorizontalAlignment.CENTER;
 
@@ -217,77 +272,123 @@ public class CellStyleKey {
             cellStyle.setAlignment(horizontalAlignment);
             cellStyle.setVerticalAlignment(verticalAlignment);
         }
+
+        @Override
+        public String toString() {
+            List<String> list = new LinkedList<>();
+            if (verticalAlignment != VerticalAlignment.CENTER) {
+                list.add("vertical: " + verticalAlignment);
+            }
+            if (horizontalAlignment != HorizontalAlignment.CENTER) {
+                list.add("horizontal: " + horizontalAlignment);
+            }
+            return String.format("align {%s}", StringUtils.join(list, "; "));
+        }
     }
 
     // foreground {color: #aa1199; type: SOLID_FOREGROUND}
     @Getter
     @ItemKeySign({"foreground", "fg"})
-    protected static class ForegroundKey extends ItemKey {
+    protected static class ForegroundKey extends AbstractItemKey {
 
         private XSSFColor xssfColor;
 
-        private FillPatternType fillPatternType = FillPatternType.SOLID_FOREGROUND;
+        private String color;
+
+        private FillPatternType type = FillPatternType.SOLID_FOREGROUND;
 
         public ForegroundKey(Map<String, String> properties) {
             super(properties);
             if (properties.containsKey("color")) {
-                xssfColor = new XSSFColor(getColorFromRGB(properties.get("color")));
+                color = properties.get("color");
+                xssfColor = new XSSFColor(getColorFromRGB(color));
             }
             if (properties.containsKey("type")) {
-                fillPatternType = FillPatternType.valueOf(properties.get("type").toUpperCase());
+                type = FillPatternType.valueOf(properties.get("type").toUpperCase());
             }
         }
 
         @Override
         public void configureCellStyle(Workbook workbook, CellStyle cellStyle) {
-            if (cellStyle instanceof XSSFCellStyle) {
-                XSSFCellStyle xssfCellStyle = (XSSFCellStyle) cellStyle;
-                xssfCellStyle.setFillForegroundColor(xssfColor);
+            if(xssfColor != null) {
+                if (cellStyle instanceof XSSFCellStyle) {
+                    XSSFCellStyle xssfCellStyle = (XSSFCellStyle) cellStyle;
+                    xssfCellStyle.setFillForegroundColor(xssfColor);
+                }
+                cellStyle.setFillPattern(type);
             }
-            cellStyle.setFillPattern(fillPatternType);
+        }
+
+        @Override
+        public String toString() {
+            List<String> list = new LinkedList<>();
+            if (color != null) {
+                list.add("color: " + color);
+            }
+            if (type != FillPatternType.SOLID_FOREGROUND) {
+                list.add("type: " + type);
+            }
+            return String.format("foreground {%s}", StringUtils.join(list, "; "));
         }
     }
 
     // border {style: thin; color: #bbaadd;}
     @Getter
     @ItemKeySign({"border", "b"})
-    protected static class BorderKey extends ItemKey {
+    protected static class BorderKey extends AbstractItemKey {
 
-        private BorderStyle borderStyle = BorderStyle.THIN;
+        private BorderStyle style = BorderStyle.THIN;
+
+        private String color;
 
         private XSSFColor xssfColor;
 
         public BorderKey(Map<String, String> properties) {
             super(properties);
             if (properties.containsKey("color")) {
-                xssfColor = new XSSFColor(getColorFromRGB(properties.get("color")));
+                color = properties.get("color");
+                xssfColor = new XSSFColor(getColorFromRGB(color));
             }
             if (properties.containsKey("style")) {
-                borderStyle = BorderStyle.valueOf(properties.get("style").toUpperCase());
+                style = BorderStyle.valueOf(properties.get("style").toUpperCase());
             }
         }
 
         @Override
         public void configureCellStyle(Workbook workbook, CellStyle cellStyle) {
-            cellStyle.setBorderTop(borderStyle);
-            cellStyle.setBorderRight(borderStyle);
-            cellStyle.setBorderBottom(borderStyle);
-            cellStyle.setBorderLeft(borderStyle);
+            cellStyle.setBorderTop(style);
+            cellStyle.setBorderRight(style);
+            cellStyle.setBorderBottom(style);
+            cellStyle.setBorderLeft(style);
 
-            if (cellStyle instanceof XSSFCellStyle) {
-                XSSFCellStyle xssfCellStyle = (XSSFCellStyle) cellStyle;
-                xssfCellStyle.setTopBorderColor(xssfColor);
-                xssfCellStyle.setRightBorderColor(xssfColor);
-                xssfCellStyle.setBottomBorderColor(xssfColor);
-                xssfCellStyle.setLeftBorderColor(xssfColor);
+            if(xssfColor != null) {
+                if (cellStyle instanceof XSSFCellStyle) {
+                    XSSFCellStyle xssfCellStyle = (XSSFCellStyle) cellStyle;
+                    xssfCellStyle.setTopBorderColor(xssfColor);
+                    xssfCellStyle.setRightBorderColor(xssfColor);
+                    xssfCellStyle.setBottomBorderColor(xssfColor);
+                    xssfCellStyle.setLeftBorderColor(xssfColor);
+                }
             }
+        }
+
+        @Override
+        public String toString() {
+            List<String> list = new LinkedList<>();
+            if (style != BorderStyle.THIN) {
+                list.add("style: " + style);
+            }
+            if (color != null) {
+                list.add("color: " + color);
+            }
+            return String.format("border {%s}", StringUtils.join(list, "; "));
         }
     }
 
     // dataFormat {format: 0.00%}
     @Getter
     @ItemKeySign({"dataFormat", "df"})
-    protected static class DataFormatKey extends ItemKey {
+    protected static class DataFormatKey extends AbstractItemKey {
 
         private String format = "@";
 
@@ -301,6 +402,44 @@ public class CellStyleKey {
         @Override
         public void configureCellStyle(Workbook workbook, CellStyle cellStyle) {
             cellStyle.setDataFormat(workbook.createDataFormat().getFormat(format));
+        }
+
+        @Override
+        public String toString() {
+            List<String> list = new LinkedList<>();
+            if (!format.equals("@")) {
+                list.add("format: '" + format + "'");
+            }
+            return String.format("dataFormat {%s}", StringUtils.join(list, "; "));
+        }
+    }
+
+    // config {wrapText}
+    @Getter
+    @ItemKeySign({"config", "c"})
+    protected static class ConfigKey extends AbstractItemKey {
+
+        private boolean wrapText;
+
+        public ConfigKey(Map<String, String> properties) {
+            super(properties);
+            if (properties.containsKey("wrapText")) {
+                wrapText = Boolean.parseBoolean(properties.get("wrapText"));
+            }
+        }
+
+        @Override
+        public void configureCellStyle(Workbook workbook, CellStyle cellStyle) {
+            cellStyle.setWrapText(wrapText);
+        }
+
+        @Override
+        public String toString() {
+            List<String> list = new LinkedList<>();
+            if (wrapText) {
+                list.add("wrapText");
+            }
+            return String.format("config {%s}", StringUtils.join(list, "; "));
         }
     }
 }

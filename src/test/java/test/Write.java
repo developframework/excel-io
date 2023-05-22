@@ -30,7 +30,7 @@ public class Write {
                             @Override
                             public Map<String, CellStyle> customCellStyles(Workbook workbook) {
                                 // 设置单元格背景色
-                                final CellStyle redCellStyle = DefaultCellStyles.normalCellStyle(workbook);
+                                final CellStyle redCellStyle = DefaultCellStyles.bodyCellStyle(workbook);
                                 redCellStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
                                 redCellStyle.setFillForegroundColor(IndexedColors.RED.getIndex());
                                 redCellStyle.setAlignment(HorizontalAlignment.RIGHT);

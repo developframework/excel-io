@@ -15,17 +15,15 @@ import java.util.function.BiConsumer;
  */
 public class CellStyleManager {
 
+    private final Workbook workbook;
+
+    private final BiConsumer<Workbook, CellStyle> globalConsumer;
+
     private final Map<String, CellStyle> cellStyleMap = new HashMap<>();
 
     public CellStyleManager(Workbook workbook, TableDefinition<?> tableDefinition) {
-        final BiConsumer<Workbook, CellStyle> globalConsumer = tableDefinition.globalCellStylesHandle();
-        registerCellStyle(workbook, globalConsumer, DefaultCellStyles.STYLE_NORMAL, DefaultCellStyles.normalCellStyle(workbook));
-        registerCellStyle(workbook, globalConsumer, DefaultCellStyles.STYLE_NORMAL_TITLE, DefaultCellStyles.normalCellStyle(workbook));
-        registerCellStyle(workbook, globalConsumer, DefaultCellStyles.STYLE_NORMAL_DATETIME, DefaultCellStyles.normalDateTimeCellStyle(workbook));
-        registerCellStyle(workbook, globalConsumer, DefaultCellStyles.STYLE_NORMAL_NUMBER, DefaultCellStyles.normalNumberCellStyle(workbook));
-        registerCellStyle(workbook, globalConsumer, DefaultCellStyles.STYLE_NORMAL_BOLD, DefaultCellStyles.normalBoldCellStyle(workbook));
-        registerCellStyle(workbook, globalConsumer, DefaultCellStyles.STYLE_NORMAL_BOLD_HEADER, DefaultCellStyles.normalBoldCellStyle(workbook));
-        registerCellStyle(workbook, globalConsumer, DefaultCellStyles.STYLE_NORMAL_PERCENT, DefaultCellStyles.normalPercentCellStyle(workbook));
+        this.workbook = workbook;
+        this.globalConsumer = tableDefinition.globalCellStylesHandle();
         tableDefinition
                 .customCellStyles(workbook)
                 .forEach((key, style) -> registerCellStyle(workbook, globalConsumer, key, style));
@@ -39,6 +37,17 @@ public class CellStyleManager {
     }
 
     public CellStyle getCellStyle(String key) {
-        return cellStyleMap.getOrDefault(key, cellStyleMap.get(DefaultCellStyles.STYLE_NORMAL));
+        CellStyle cellStyle = cellStyleMap.get(key);
+        if(cellStyle == null) {
+            if(CellStyleKey.isCellStyleKey(key)) {
+                final CellStyleKey cellStyleKey = CellStyleKey.parse(key);
+                cellStyle = workbook.createCellStyle();
+                cellStyleKey.configureCellStyle(workbook, cellStyle);
+                registerCellStyle(workbook, globalConsumer, key, cellStyle);
+            } else {
+                throw new IllegalArgumentException(String.format("\"%s\" is not exists or invalid", key));
+            }
+        }
+        return cellStyle;
     }
 }

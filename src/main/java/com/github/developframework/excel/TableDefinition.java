@@ -78,7 +78,7 @@ public interface TableDefinition<ENTITY> {
     default void createTableTitle(Sheet sheet, CellStyleManager cellStyleManager, int rowIndex, final int startColumnIndex, String title, int columnSize) {
         if (title != null && !title.isBlank()) {
             Row titleRow = sheet.createRow(rowIndex);
-            final CellStyle cellStyle = cellStyleManager.getCellStyle(DefaultCellStyles.STYLE_NORMAL_TITLE);
+            final CellStyle cellStyle = cellStyleManager.getCellStyle(DefaultCellStyles.STYLE_TITLE);
             for (int i = startColumnIndex; i < startColumnIndex + columnSize; i++) {
                 titleRow.createCell(i).setCellStyle(cellStyle);
             }
@@ -101,7 +101,7 @@ public interface TableDefinition<ENTITY> {
      */
     default int createTableColumnHeader(Sheet sheet, CellStyleManager cellStyleManager, int rowIndex, final int startColumnIndex, ColumnDefinition<ENTITY>[] columnDefinitions) {
         Row headerRow = sheet.createRow(rowIndex);
-        final CellStyle headerCellStyle = cellStyleManager.getCellStyle(DefaultCellStyles.STYLE_NORMAL_BOLD_HEADER);
+        final CellStyle headerCellStyle = cellStyleManager.getCellStyle(DefaultCellStyles.STYLE_HEADER);
         ColumnDefinition<ENTITY> columnDefinition;
         for (int i = 0; i < columnDefinitions.length; i++) {
             final Cell headerCell = headerRow.createCell(startColumnIndex + i);
