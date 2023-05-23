@@ -41,9 +41,13 @@ public class CellStyleManager {
         if(cellStyle == null) {
             if(CellStyleKey.isCellStyleKey(key)) {
                 final CellStyleKey cellStyleKey = CellStyleKey.parse(key);
+                final String standardKey = cellStyleKey.toString();
                 cellStyle = workbook.createCellStyle();
                 cellStyleKey.configureCellStyle(workbook, cellStyle);
-                registerCellStyle(workbook, globalConsumer, key, cellStyle);
+                registerCellStyle(workbook, globalConsumer, standardKey, cellStyle);
+                if(!standardKey.equals(key)) {
+                    cellStyleMap.put(key, cellStyle);
+                }
             } else {
                 throw new IllegalArgumentException(String.format("\"%s\" is not exists or invalid", key));
             }

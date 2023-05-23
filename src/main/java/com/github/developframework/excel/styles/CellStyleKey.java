@@ -3,9 +3,6 @@ package com.github.developframework.excel.styles;
 import lombok.Getter;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.ss.usermodel.*;
-import org.apache.poi.xssf.usermodel.XSSFCellStyle;
-import org.apache.poi.xssf.usermodel.XSSFColor;
-import org.apache.poi.xssf.usermodel.XSSFFont;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -170,9 +167,7 @@ public class CellStyleKey implements ItemKey {
 
         private short size;
 
-        private XSSFColor xssfColor;
-
-        private String color;
+        private CompositeColor color;
 
         private String family;
 
@@ -186,8 +181,7 @@ public class CellStyleKey implements ItemKey {
                 size = Short.parseShort(properties.get("size"));
             }
             if (properties.containsKey("color")) {
-                color = properties.get("color");
-                xssfColor = new XSSFColor(getColorFromRGB(color));
+                color = new CompositeColor(properties.get("color"));
             }
             if (properties.containsKey("family")) {
                 family = properties.get("family");
@@ -209,13 +203,12 @@ public class CellStyleKey implements ItemKey {
             if (size != 0) {
                 font.setFontHeightInPoints(size);
             }
+
             font.setItalic(italic);
             font.setBold(bold);
 
-            if(xssfColor != null) {
-                if (font instanceof XSSFFont) {
-                    ((XSSFFont) font).setColor(xssfColor);
-                }
+            if(color != null) {
+                color.configureFontColor(workbook, font);
             }
             cellStyle.setFont(font);
         }
@@ -291,17 +284,14 @@ public class CellStyleKey implements ItemKey {
     @ItemKeySign({"foreground", "fg"})
     protected static class ForegroundKey extends AbstractItemKey {
 
-        private XSSFColor xssfColor;
-
-        private String color;
+        private CompositeColor color;
 
         private FillPatternType type = FillPatternType.SOLID_FOREGROUND;
 
         public ForegroundKey(Map<String, String> properties) {
             super(properties);
             if (properties.containsKey("color")) {
-                color = properties.get("color");
-                xssfColor = new XSSFColor(getColorFromRGB(color));
+                color = new CompositeColor(properties.get("color"));
             }
             if (properties.containsKey("type")) {
                 type = FillPatternType.valueOf(properties.get("type").toUpperCase());
@@ -310,11 +300,8 @@ public class CellStyleKey implements ItemKey {
 
         @Override
         public void configureCellStyle(Workbook workbook, CellStyle cellStyle) {
-            if(xssfColor != null) {
-                if (cellStyle instanceof XSSFCellStyle) {
-                    XSSFCellStyle xssfCellStyle = (XSSFCellStyle) cellStyle;
-                    xssfCellStyle.setFillForegroundColor(xssfColor);
-                }
+            if(color != null) {
+                color.configureForegroundColor(workbook, cellStyle);
                 cellStyle.setFillPattern(type);
             }
         }
@@ -339,15 +326,12 @@ public class CellStyleKey implements ItemKey {
 
         private BorderStyle style = BorderStyle.THIN;
 
-        private String color;
-
-        private XSSFColor xssfColor;
+        private CompositeColor color;
 
         public BorderKey(Map<String, String> properties) {
             super(properties);
             if (properties.containsKey("color")) {
-                color = properties.get("color");
-                xssfColor = new XSSFColor(getColorFromRGB(color));
+                color = new CompositeColor(properties.get("color"));
             }
             if (properties.containsKey("style")) {
                 style = BorderStyle.valueOf(properties.get("style").toUpperCase());
@@ -361,14 +345,8 @@ public class CellStyleKey implements ItemKey {
             cellStyle.setBorderBottom(style);
             cellStyle.setBorderLeft(style);
 
-            if(xssfColor != null) {
-                if (cellStyle instanceof XSSFCellStyle) {
-                    XSSFCellStyle xssfCellStyle = (XSSFCellStyle) cellStyle;
-                    xssfCellStyle.setTopBorderColor(xssfColor);
-                    xssfCellStyle.setRightBorderColor(xssfColor);
-                    xssfCellStyle.setBottomBorderColor(xssfColor);
-                    xssfCellStyle.setLeftBorderColor(xssfColor);
-                }
+            if(color != null) {
+                color.configureBorderColor(workbook, cellStyle);
             }
         }
 

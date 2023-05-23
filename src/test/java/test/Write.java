@@ -2,13 +2,11 @@ package test;
 
 import com.github.developframework.excel.*;
 import com.github.developframework.excel.column.ColumnDefinitionBuilder;
-import com.github.developframework.excel.styles.DefaultCellStyles;
-import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.ss.usermodel.Workbook;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Map;
 
 /**
  * @author qiushui on 2022-06-28.
@@ -28,23 +26,13 @@ public class Write {
                 .load(students, new TableDefinition<>() {
 
                             @Override
-                            public Map<String, CellStyle> customCellStyles(Workbook workbook) {
-                                // 设置单元格背景色
-                                final CellStyle redCellStyle = DefaultCellStyles.bodyCellStyle(workbook);
-                                redCellStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
-                                redCellStyle.setFillForegroundColor(IndexedColors.RED.getIndex());
-                                redCellStyle.setAlignment(HorizontalAlignment.RIGHT);
-                                return Map.of("redColor", redCellStyle);
-                            }
-
-                            @Override
                             public ColumnDefinition<Student>[] columnDefinitions(Workbook workbook, ColumnDefinitionBuilder<Student> builder) {
                                 // 判定分数大于60
-                                final CellStyleKeyProvider<Student> scoreKeyFunction = (cell, e, v) -> ((Integer) v) >= 60 ? null : "redColor";
+                                final CellStyleKeyProvider<Student> scoreKeyFunction = (cell, e, v) -> ((Integer) v) >= 60 ? null : "align {h: right} fg {color: RED}";
                                 // 判定分数大于180
-                                final CellStyleKeyProvider<Student> totalKeyFunction = (cell, e, v) -> ((Integer) v) >= 180 ? null : "redColor";
+                                final CellStyleKeyProvider<Student> totalKeyFunction = (cell, e, v) -> ((Integer) v) >= 180 ? null : "align {h: right} fg {color: RED}";
                                 // 判定是否合格
-                                final CellStyleKeyProvider<Student> passKeyFunction = (cell, e, v) -> v.equals("合格") ? null : "redColor";
+                                final CellStyleKeyProvider<Student> passKeyFunction = (cell, e, v) -> v.equals("合格") ? null : "align {h: right} fg {color: RED}";
                                 return builder.columnDefinitions(
                                         builder.<String>column("name", "学生姓名"),
                                         builder.<Student.Gender>column("gender", "性别"),
