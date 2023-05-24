@@ -246,7 +246,7 @@ public ColumnDefinition<Student>[] columnDefinitions(Workbook workbook, ColumnDe
              * 配置单元格格式
              */
             @Override
-            public void configureCellStyle(Cell cell, CellStyleManager cellStyleManager, Object value) {
+            public void configureCellStyle(Cell cell, CellStyleManager cellStyleManager, Student entity, Object value) {
                 cell.setCellStyle(cellStyleManager.getCellStyle(DefaultCellStyles.STYLE_NORMAL));
             }
         }
@@ -270,18 +270,96 @@ public ColumnDefinition<Student>[] columnDefinitions(Workbook workbook, ColumnDe
 
 所以提供`CellStyleManager`单元格样式管理器来管理申明的样式，做到复用CellStyle对象
 
-##### 默认单元格样式键
+##### 单元格样式键
 
-+ `DefaultCellStyles.STYLE_NORMAL` 黑色细线边框文字居中
-+ `DefaultCellStyles.STYLE_NORMAL_DATETIME` 黑色细线边框文字居中，`yyyy-mm-dd hh:mm:ss`时间格式
-+ `DefaultCellStyles.STYLE_NORMAL_NUMBER` 黑色细线边框数字文字居右
-+ `DefaultCellStyles.STYLE_NORMAL_BOLD` 黑色细线边框数字文字加粗居中
+用于在`CellStyleManager`内选取CellStyle的键，可以是自定义的任意字符串。也可以是一个特定结构的字符串用于描述CellStyle的特性（格式类似于层叠样式CSS），预设有如下写法：
+
++ **align 对齐**
+
+```
+align {vertical: right; horizontal: center}
+可缩写成 a {v: right; h: center}
+```
+
++ **border 边框**
+
+```
+border {style: thin; color: #ff0000}
+可缩写成 b {style: thin; color: RED}
+```
+
++ **dataFormat 格式**
+
+```
+dataFormat {format: 0.00%}
+dataFormat {format: 'yyyy-mm-dd hh:mm:ss'}   如果格式中需要包含空格，需要加单引号
+可缩写成 df {format: 'yyyy-mm-dd hh:mm:ss'}
+```
+
++ **font 字体**
+
+```
+font {size: 16; bold: true; italic: true; family: '宋体'; color: #ff0000}
+可缩写成 f {size: 16; bold; italic; family: '宋体'; color: #ff0000}  boolean字段是true的话可以缩写
+```
+
++ **foreground 前景色**
+
+```
+foreground {color: #aa1199; type: SOLID_FOREGROUND}
+可缩写成 fg {color: #aa1199; type: SOLID_FOREGROUND}
+```
+
++ **config 其他配置**
+
+```
+config {wrapText: true} 允许单元格内换行
+可缩写成 c {wrapText}
+```
+
+可在cellStyleKey()方法内直接使用
 
 ```java
-cell.setCellStyle(cellStyleManager.getCellStyle(DefaultCellStyles.STYLE_NORMAL));
+builder
+        .column(...)
+    	// 结合文本块功能写起来更美观
+        .cellStyleKey((cell, entity, cellValue) -> """
+            a {
+                h: right
+            }
+            font {
+                color: #ffff00;
+                size: 20
+            }
+            """;
+        )
+```
+
+##### 默认单元格样式键
+
+预设了默认的单元格样式：
+
+| 默认单元格样式键                                    | 样式键                                                | 说明                 | 备注         |
+| --------------------------------------------------- | ----------------------------------------------------- | -------------------- | ------------ |
+| **DefaultCellStyles.STYLE_TITLE**                   | font {size: 16; bold}                                 | 加粗 16号字          | 标题采用     |
+| **DefaultCellStyles.STYLE_HEADER**                  | font {bold}                                           | 加粗                 | 列头采用     |
+| **DefaultCellStyles.STYLE_BODY**                    | <空字符串>                                            | 黑色细线边框文字居中 | 表格内容采用 |
+| **DefaultCellStyles.STYLE_BODY_BOLD**               | font {bold}                                           | 加粗                 |              |
+| **DefaultCellStyles.STYLE_BODY_ITALIC**             | font {italic}                                         | 斜体                 |              |
+| **DefaultCellStyles.STYLE_BODY_PERCENT**            | dataFormat {format: '0.00%'}                          | 0.00% 百分比格式     |              |
+| **DefaultCellStyles.STYLE_BODY_DATETIME**           | dataFormat {format: 'yyyy-mm-dd hh:mm:ss'}            | 日期时间格式         |              |
+| **DefaultCellStyles.STYLE_BODY_DATE**               | dataFormat {format: 'yyyy-mm-dd'}                     | 日期格式             |              |
+| **DefaultCellStyles.STYLE_BODY_TIME**               | dataFormat {format: 'hh:mm:ss'}                       | 时间格式             |              |
+| **DefaultCellStyles.STYLE_BODY_NUMBER**             | align {horizontal: RIGHT}                             | 文字居右             |              |
+| **DefaultCellStyles.STYLE_BODY_NUMBER_2_PRECISION** | align {horizontal: RIGHT} dataFormat {format: '0.00'} | 精度2 文字居右       |              |
+
+```java
+cell.setCellStyle(cellStyleManager.getCellStyle(DefaultCellStyles.STYLE_BODY));
 ```
 
 ##### 自定义单元格样式
+
+可以用于覆盖默认单元格样式，也可初始化自定义样式
 
 ```java
 new TableDefinition<>() {
@@ -291,10 +369,11 @@ new TableDefinition<>() {
     @Override
     public Map<String, CellStyle> customCellStyles(Workbook workbook) {
         // final CellStyle cellStyle = workbook.createCellStyle();
-        final CellStyle cellStyle = DefaultCellStyles.normalCellStyle(workbook);
+        final CellStyle cellStyle = DefaultCellStyles.buildByCellStyleKey(DefaultCellStyles.STYLE_BODY);
         // 对单元格样式做自定义配置
         cellStyle.setDataFormat(...);
-        return Map.of("customKey", cellStyle);
+        // 如果选择默认样式的键将会覆盖
+        return Map.of(DefaultCellStyles.STYLE_BODY, cellStyle);
     }
 }
 ```
@@ -305,8 +384,8 @@ new TableDefinition<>() {
 builder
         .column(...)
         // 获得样式键 （可以针对单元格值来选择样式）
-        .cellStyleKey((cell, cellValue) -> {
-            return "customKey";
+        .cellStyleKey((cell, entity, cellValue) -> {
+            return cellValue == null ? DefaultCellStyles.STYLE_BODY : "customKey";
         })
 ```
 
@@ -322,31 +401,28 @@ ExcelIO
         @Override
         public Map<String, CellStyle> customCellStyles(Workbook workbook) {
             // 设置单元格背景色
-            final CellStyle redCellStyle = DefaultCellStyles.normalCellStyle(workbook);
-            redCellStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
-            redCellStyle.setFillForegroundColor(IndexedColors.RED.getIndex());
-            redCellStyle.setAlignment(HorizontalAlignment.RIGHT);
+            final CellStyle redCellStyle = DefaultCellStyles.buildByCellStyleKey("a {h: right} fg {color: RED}");
             return Map.of("redColor", redCellStyle);
         }
 
         @Override
         public ColumnDefinition<Student>[] columnDefinitions(Workbook workbook, ColumnDefinitionBuilder builder) {
             // 判定分数大于60
-            final BiFunction<Cell, Object, String> scoreKeyFunction = (cell, v) -> ((Integer) v) >= 60 ? null : "redColor";
+            final CellStyleKeyProvider<Student> scoreKeyProvider = (cell, e, v) -> ((Integer) v) >= 60 ? null : "redColor";
             // 判定分数大于180
-            final BiFunction<Cell, Object, String> totalKeyFunction = (cell, v) -> ((Integer) v) >= 180 ? null : "redColor";
+            final CellStyleKeyProvider<Student> totalKeyProvider = (cell, e, v) -> ((Integer) v) >= 180 ? null : "redColor";
             // 判定是否合格
-            final BiFunction<Cell, Object, String> qualifiedKeyFunction = (cell, v) -> v.equals("合格")? null : "redColor";
+            final CellStyleKeyProvider<Student> qualifiedKeyProvider = (cell, e, v) -> v.equals("合格")? null : "redColor";
             return builder.columnDefinitions(
-                builder.<String>column("name", "学生姓名"),
-                builder.<Student.Gender>column("gender", "性别"),
-                builder.<LocalDate>column("birthday", "生日"),
-                builder.<LocalDateTime>column("createTime", "入学时间"),
-                builder.<Integer>column("chineseScore", "语文成绩").cellStyleKey(scoreKeyFunction),
-                builder.<Integer>column("mathScore", "数学成绩").cellStyleKey(scoreKeyFunction),
-                builder.<Integer>column("englishScore", "英语成绩").cellStyleKey(scoreKeyFunction),
-                builder.<Integer>formula(Integer.class, "总成绩", "SUM(E{row}:G{row})").cellStyleKey(totalKeyFunction),
-                builder.<String>formula(String.class, "是否合格", "IF(H{row} >= 180,\"合格\",\"不合格\")").cellStyleKey(qualifiedKeyFunction)
+                builder.column("name", "学生姓名"),
+                builder.column("gender", "性别"),
+                builder.column("birthday", "生日"),
+                builder.column("createTime", "入学时间"),
+                builder.column("chineseScore", "语文成绩").cellStyleKey(scoreKeyFunction),
+                builder.column("mathScore", "数学成绩").cellStyleKey(scoreKeyFunction),
+                builder.column("englishScore", "英语成绩").cellStyleKey(scoreKeyFunction),
+                builder.formula(Integer.class, "总成绩", "SUM(E{row}:G{row})").cellStyleKey(totalKeyFunction),
+                builder.formula(String.class, "是否合格", "IF(H{row} >= 180,\"合格\",\"不合格\")").cellStyleKey(qualifiedKeyFunction)
             );
         }
     }
@@ -358,7 +434,7 @@ ExcelIO
 
 ##### 全局单元格样式
 
-对所有注册进单元格样式管理器的CellStyle执行处理
+对所有注册进单元格样式管理器的CellStyle执行统一处理
 
 ```java
 new TableDefinition<>(){
@@ -369,11 +445,132 @@ new TableDefinition<>(){
     @Override
     public BiConsumer<Workbook, CellStyle> globalCellStylesHandle() {
         return (workbook, cellStyle) -> {
-            // 字体加粗
+            // 改变全部字体
             final Font font = workbook.createFont();
-            font.setBold(true);
+            font.setFontName("宋体");
             cellStyle.setFont(font);
         };
     }
 }
 ```
+
+## Demo
+
+制作员工考勤表
+
+```java
+@Getter
+@Setter
+public class StaffAttendance {
+
+    // 员工姓名
+    private String name;
+
+    // 考勤记录
+    private Attendance[] attendances;
+
+    @Getter
+    @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
+    public enum Attendance {
+        // 出勤
+        ON_DUTY("Y"),
+		// 请假
+        LEAVE("N");
+
+        private final String text;
+    }
+}
+```
+
+```java
+public static List<StaffAttendance> buildStaffAttendances() {
+        return List.of(
+                createStaffAttendance("张三", new int[]{15, 20}),
+                createStaffAttendance("李四", new int[]{3}),
+                createStaffAttendance("王五", new int[]{3, 4, 27})
+        );
+    }
+
+private static StaffAttendance createStaffAttendance(String name, int[] leaveDays) {
+    StaffAttendance staffAttendance = new StaffAttendance();
+    staffAttendance.setName(name);
+    final StaffAttendance.Attendance[] attendances = new StaffAttendance.Attendance[31];
+    staffAttendance.setAttendances(attendances);
+    Arrays.fill(attendances, StaffAttendance.Attendance.ON_DUTY);
+    for (int leaveDay : leaveDays) {
+        attendances[leaveDay - 1] = StaffAttendance.Attendance.LEAVE;
+    }
+    return staffAttendance;
+}
+```
+
+```java
+final List<StaffAttendance> projects = buildStaffAttendances();
+        ExcelIO.writer(ExcelType.XLSX)
+            .load(projects, new TableDefinition<>() {
+
+                @Override
+                public TableInfo tableInfo() {
+                    TableInfo tableInfo = new TableInfo();
+                    tableInfo.hasTitle = true;
+                    tableInfo.title = "员工考勤表";
+                    tableInfo.sheetName = "考勤表";
+                    return tableInfo;
+                }
+
+                @Override
+                public Map<String, CellStyle> customCellStyles(Workbook workbook) {
+                    // 自定义标题样式 覆盖原有样式
+                    final CellStyle titleCellStyle = DefaultCellStyles.buildByCellStyleKey(workbook, "font {size: 16; bold; color: BLUE}");
+                    return Map.of(DefaultCellStyles.STYLE_TITLE, titleCellStyle);
+                }
+
+                @Override
+                public BiConsumer<Workbook, CellStyle> globalCellStylesHandle() {
+                    return (workbook, cellStyle) -> {
+                        // 修改全局字体
+                        final Font font = workbook.getFontAt(cellStyle.getFontIndexAsInt());
+                        font.setFontName("黑体");
+                    };
+                }
+
+                @Override
+                @SuppressWarnings("unchecked")
+                public ColumnDefinition<StaffAttendance>[] columnDefinitions(Workbook workbook, ColumnDefinitionBuilder<StaffAttendance> builder) {
+                    List<ColumnDefinition<StaffAttendance>> columnDefinitions = new LinkedList<>();
+                    columnDefinitions.add(
+                        builder.column("name", "员工姓名").columnWidth(20)
+                    );
+                    for (int i = 0; i < 31; i++) {
+                        columnDefinitions.add(
+                            builder.<StaffAttendance.Attendance>column(String.format("attendances[%d]", i), String.valueOf(i + 1))
+                            .writeConvert((e, v) -> v.getText())
+                            // 把请假的标记为红色
+                            .cellStyleKey((c, e, v) -> v.equals(StaffAttendance.Attendance.LEAVE.getText()) ? "fg {color: RED}" : null)
+                            .columnWidth(3)
+                        );
+                    }
+
+                    // 可以用工具类方便计算出列名
+                    final String startColumnName = ColumnUtils.getColumnNameByIndex((short) 1); // B
+                    final String endColumnName = ColumnUtils.getColumnNameByIndex((short) 31); // AF
+
+                    // 居右的红色文字样式
+                    final CellStyleKeyProvider<StaffAttendance> redRightProvider = (c, e, v) -> "a {h: right} f {color: #ff0000}";
+
+                    // 使用函数进行统计 {row} 动态行数
+                    columnDefinitions.add(
+                        builder.formula(Integer.class, "出勤天数", String.format("=COUNTIF(%s{row}:%s{row},\"Y\")", startColumnName, endColumnName))
+                        .cellStyleKey(redRightProvider).columnWidth(10)
+                    );
+                    columnDefinitions.add(
+                        builder.formula(Integer.class, "请假天数", String.format("=COUNTIF(%s{row}:%s{row},\"N\")", startColumnName, endColumnName))
+                        .cellStyleKey(redRightProvider).columnWidth(10)
+                    );
+                    return columnDefinitions.toArray(ColumnDefinition[]::new);
+                }
+            })
+            .writeToFile("D:\\员工考勤表.xlsx");
+```
+
+![](doc-images/3.png)
