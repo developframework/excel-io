@@ -45,21 +45,17 @@ public final class ExcelIO {
      * @param inputStream 输入流
      * @return 读取器
      */
-    public static ExcelReader reader(ExcelType excelType, InputStream inputStream) {
+    public static ExcelReader reader(ExcelType excelType, InputStream inputStream) throws IOException {
         Workbook workbook;
-        try (inputStream) {
-            switch (excelType) {
-                case XLS:
-                    workbook = new HSSFWorkbook(inputStream);
-                    break;
-                case XLSX:
-                    workbook = new XSSFWorkbook(inputStream);
-                    break;
-                default:
-                    throw new IllegalArgumentException();
-            }
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
+        switch (excelType) {
+            case XLS:
+                workbook = new HSSFWorkbook(inputStream);
+                break;
+            case XLSX:
+                workbook = new XSSFWorkbook(inputStream);
+                break;
+            default:
+                throw new IllegalArgumentException();
         }
         return new ExcelReader(workbook);
     }
@@ -70,11 +66,9 @@ public final class ExcelIO {
      * @param filename 文件名
      * @return 读取器
      */
-    public static ExcelReader reader(String filename) {
-        try {
-            return reader(ExcelType.parse(filename), new FileInputStream(filename));
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
+    public static ExcelReader reader(String filename) throws IOException {
+        try (InputStream in = new FileInputStream(filename)) {
+            return reader(ExcelType.parse(filename), in);
         }
     }
 
@@ -85,12 +79,8 @@ public final class ExcelIO {
      * @param password    密码
      * @return 读取器
      */
-    public static ExcelReader readerWithPassword(InputStream inputStream, String password) {
-        try (inputStream) {
-            return new ExcelReader(WorkbookFactory.create(inputStream, password));
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
-        }
+    public static ExcelReader readerWithPassword(InputStream inputStream, String password) throws IOException {
+        return new ExcelReader(WorkbookFactory.create(inputStream, password));
     }
 
     /**
