@@ -16,7 +16,7 @@
             <name>qiuzhenhao</name>
             <email>408000511@qq.com</email>
             <organization>developframework</organization>
-            <organizationUrl>http://blog.qiushuicloud.xyz</organizationUrl>
+            <organizationUrl>https://github.com/developframework</organizationUrl>
         </developer>
     </developers>
 
@@ -43,7 +43,7 @@
         <maven.compiler.source>11</maven.compiler.source>
         <maven.compiler.target>11</maven.compiler.target>
 
-        <version.lombok>1.18.24</version.lombok>
+        <version.lombok>1.18.26</version.lombok>
         <version.poi>4.1.0</version.poi>
         <version.expression>1.6.0</version.expression>
         <version.slf4j-api>1.7.36</version.slf4j-api>
@@ -128,8 +128,9 @@
             <build>
                 <plugins>
                     <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-gpg-plugin</artifactId>
-                        <version>1.5</version>
+                        <version>3.0.1</version>
                         <executions>
                             <execution>
                                 <id>sign-artifacts</id>
@@ -140,8 +141,20 @@
                             </execution>
                         </executions>
                     </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-javadoc-plugin</artifactId>
+                        <version>3.4.0</version>
+                        <configuration>
+                            <doclint>none</doclint>
+                            <charset>UTF-8</charset>
+                            <encoding>UTF-8</encoding>
+                            <docencoding>UTF-8</docencoding>
+                        </configuration>
+                    </plugin>
                 </plugins>
             </build>
+
             <distributionManagement>
                 <snapshotRepository>
                     <id>ossrh</id>
