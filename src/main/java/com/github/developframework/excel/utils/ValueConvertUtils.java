@@ -71,6 +71,8 @@ public class ValueConvertUtils {
             return Float.parseFloat(value);
         } else if (targetClass == Boolean.class || targetClass == Boolean.TYPE) {
             return Integer.parseInt(value) > 0;
+        } else if (targetClass == BigDecimal.class) {
+            return new BigDecimal(value);
         } else {
             return value;
         }
