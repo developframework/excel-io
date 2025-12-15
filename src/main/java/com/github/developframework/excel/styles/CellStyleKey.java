@@ -392,23 +392,29 @@ public class CellStyleKey implements ItemKey {
         }
     }
 
-    // config {wrapText}
+    // config {wrapText, locked}
     @Getter
     @ItemKeySign({"config", "c"})
     protected static class ConfigKey extends AbstractItemKey {
 
         private boolean wrapText;
 
+        private boolean locked;
+
         public ConfigKey(Map<String, String> properties) {
             super(properties);
             if (properties.containsKey("wrapText")) {
                 wrapText = Boolean.parseBoolean(properties.get("wrapText"));
+            }
+            if (properties.containsKey("locked")) {
+                locked = Boolean.parseBoolean(properties.get("locked"));
             }
         }
 
         @Override
         public void configureCellStyle(Workbook workbook, CellStyle cellStyle) {
             cellStyle.setWrapText(wrapText);
+            cellStyle.setLocked(locked);
         }
 
         @Override
@@ -416,6 +422,9 @@ public class CellStyleKey implements ItemKey {
             List<String> list = new LinkedList<>();
             if (wrapText) {
                 list.add("wrapText");
+            }
+            if (locked) {
+                list.add("locked");
             }
             return String.format("config {%s}", StringUtils.join(list, "; "));
         }

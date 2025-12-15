@@ -24,9 +24,7 @@ public class CellStyleManager {
     public CellStyleManager(Workbook workbook, TableDefinition<?> tableDefinition) {
         this.workbook = workbook;
         this.globalConsumer = tableDefinition.globalCellStylesHandle();
-        tableDefinition
-                .customCellStyles(workbook)
-                .forEach((key, style) -> registerCellStyle(workbook, globalConsumer, key, style));
+        cellStyleMap.putAll(tableDefinition.customCellStyles(workbook));
     }
 
     private void registerCellStyle(Workbook workbook, BiConsumer<Workbook, CellStyle> globalConsumer, String key, CellStyle cellStyle) {
