@@ -56,7 +56,7 @@ public abstract class AbstractColumnDefinition<ENTITY, FIELD> implements ColumnD
         if (cellCommentInfo != null) {
             final Object c = ExpressionUtils.getValue(entity, cellCommentInfo.getCommentField());
             final Object a = ExpressionUtils.getValue(entity, cellCommentInfo.getAuthorField());
-            if(c != null && a != null) {
+            if (c != null && a != null) {
                 Drawing drawing = sheet.createDrawingPatriarch();
                 final ClientAnchor anchor = cellCommentInfo.getAnchorFunction().apply(drawing, cell);
                 anchor.setAnchorType(ClientAnchor.AnchorType.MOVE_DONT_RESIZE);
@@ -148,9 +148,30 @@ public abstract class AbstractColumnDefinition<ENTITY, FIELD> implements ColumnD
             case BOOLEAN:
                 value = ValueConvertUtils.booleanConvert(cell.getBooleanCellValue(), fieldClass);
                 break;
-//            case FORMULA:
-//                value = cell.getCellFormula();
-//                break;
+            case FORMULA:
+                switch (cell.getCachedFormulaResultType()) {
+                    case NUMERIC: {
+                        if (DateUtil.isCellDateFormatted(cell)) {
+                            value = ValueConvertUtils.dateConvert(cell.getDateCellValue(), fieldClass);
+                        } else {
+                            value = cell.getNumericCellValue();
+                        }
+                    }
+                    break;
+                    case STRING: {
+                        value = ValueConvertUtils.stringConvert(cell.getRichStringCellValue().getString().trim(), fieldClass);
+                    }
+                    break;
+                    case BOOLEAN: {
+                        value = ValueConvertUtils.booleanConvert(cell.getBooleanCellValue(), fieldClass);
+                    }
+                    break;
+                    default: {
+                        value = null;
+                    }
+                    break;
+                }
+                break;
             default:
                 value = null;
                 break;
