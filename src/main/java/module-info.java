@@ -5,10 +5,10 @@ module excel.io {
     requires expression;
     requires lombok;
     requires org.apache.commons.lang3;
-    requires poi;
-    requires poi.ooxml;
     requires org.slf4j;
     requires java.desktop;
+    requires org.apache.poi.poi;
+    requires org.apache.poi.ooxml;
 
     exports com.github.developframework.excel.column;
     exports com.github.developframework.excel.styles;

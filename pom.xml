@@ -46,7 +46,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
         <version.lombok>1.18.26</version.lombok>
-        <version.poi>4.1.0</version.poi>
+        <version.poi>5.2.4</version.poi>
         <version.expression>1.6.0</version.expression>
         <version.slf4j-api>1.7.36</version.slf4j-api>
     </properties>
