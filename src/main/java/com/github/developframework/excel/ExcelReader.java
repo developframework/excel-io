@@ -63,6 +63,9 @@ public class ExcelReader extends ExcelProcessor {
         final List<ENTITY> list = new LinkedList<>();
         for (int i = 0; i < size; i++) {
             Row row = sheet.getRow(rowIndex + i);
+            if (row == null) {
+                continue;
+            }
             ColumnDefinition<ENTITY> columnDefinition = null;
             try {
                 final ENTITY entity = entityClass.getConstructor().newInstance();
