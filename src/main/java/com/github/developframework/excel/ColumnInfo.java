@@ -10,6 +10,7 @@ public class ColumnInfo {
     public final String field;
     public final String header;
     public Integer columnWidth;
+    public Class<?> fieldType;
 
 
     public ColumnInfo(String field, String header, Integer columnWidth) {

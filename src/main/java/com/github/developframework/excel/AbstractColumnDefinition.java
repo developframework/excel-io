@@ -15,6 +15,7 @@ import java.lang.reflect.Field;
 import java.math.BigDecimal;
 import java.time.*;
 import java.util.Date;
+import java.util.Map;
 import java.util.function.BiFunction;
 
 /**
@@ -80,8 +81,13 @@ public abstract class AbstractColumnDefinition<ENTITY, FIELD> implements ColumnD
     @Override
     @SuppressWarnings("unchecked")
     public void readOutCell(Workbook workbook, Cell cell, ENTITY entity) {
-        final Field field = FieldUtils.getDeclaredField(entity.getClass(), columnInfo.field, true);
-        final Object cellValue = getCellValue(cell, field.getType());
+        final Object cellValue;
+        if (entity instanceof Map) {
+            cellValue = getCellValue(cell, this.columnInfo.fieldType == null ? String.class : this.columnInfo.fieldType);
+        } else {
+            final Field field = FieldUtils.getDeclaredField(entity.getClass(), columnInfo.field, true);
+            cellValue = getCellValue(cell, field.getType());
+        }
         final FIELD convertValue = readConvertFunction == null ? (FIELD) cellValue : readConvertFunction.apply(entity, cellValue);
         if (convertValue != null) {
             setEntityValue(entity, convertValue);
@@ -185,9 +191,14 @@ public abstract class AbstractColumnDefinition<ENTITY, FIELD> implements ColumnD
      * @param entity 实体
      * @param value  值
      */
+    @SuppressWarnings("unchecked")
     @SneakyThrows(IllegalAccessException.class)
     protected void setEntityValue(ENTITY entity, Object value) {
-        FieldUtils.writeDeclaredField(entity, columnInfo.field, value, true);
+        if (entity instanceof Map) {
+            ((Map) entity).put(columnInfo.field, value);
+        } else {
+            FieldUtils.writeDeclaredField(entity, columnInfo.field, value, true);
+        }
     }
 
     /**
@@ -208,6 +219,14 @@ public abstract class AbstractColumnDefinition<ENTITY, FIELD> implements ColumnD
      */
     public final AbstractColumnDefinition<ENTITY, FIELD> columnWidth(int columnWidth) {
         this.columnInfo.columnWidth = columnWidth;
+        return this;
+    }
+
+    /**
+     * 指定字段类型
+     */
+    public final AbstractColumnDefinition<ENTITY, FIELD> asFieldType(Class<?> fieldType) {
+        this.columnInfo.fieldType = fieldType;
         return this;
     }
 
