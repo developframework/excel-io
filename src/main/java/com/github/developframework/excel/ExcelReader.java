@@ -3,10 +3,7 @@ package com.github.developframework.excel;
 import com.github.developframework.excel.column.BlankColumnDefinition;
 import com.github.developframework.excel.column.ColumnDefinitionBuilder;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.*;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -60,10 +57,11 @@ public class ExcelReader extends ExcelProcessor {
         // 列定义
         final ColumnDefinition<ENTITY>[] columnDefinitions = tableDefinition.columnDefinitions(workbook, new ColumnDefinitionBuilder<>(workbook));
         final int size = Math.min(readSize, totalSize);
+        final int endRowIndex = rowIndex + totalSize;
         final List<ENTITY> list = new LinkedList<>();
-        for (int i = 0; i < size; i++) {
-            Row row = sheet.getRow(rowIndex + i);
-            if (row == null) {
+        for (int currentRow = rowIndex; currentRow < endRowIndex && list.size() < size; currentRow++) {
+            Row row = sheet.getRow(currentRow);
+            if (isBlankRow(row, startColumnIndex, columnDefinitions)) {
                 continue;
             }
             ColumnDefinition<ENTITY> columnDefinition = null;
@@ -89,6 +87,34 @@ public class ExcelReader extends ExcelProcessor {
             }
         }
         return new ArrayList<>(list);
+    }
+
+    /**
+     * 判断一行在数据列范围内是否没有有效值
+     */
+    private static boolean isBlankRow(Row row, int startColumnIndex, ColumnDefinition<?>[] columnDefinitions) {
+        if (row == null) {
+            return true;
+        }
+        for (int j = 0; j < columnDefinitions.length; j++) {
+            final ColumnDefinition<?> columnDefinition = columnDefinitions[j];
+            if (columnDefinition == null || columnDefinition instanceof BlankColumnDefinition) {
+                continue;
+            }
+            final Cell cell = row.getCell(startColumnIndex + j);
+            if (cell == null) {
+                continue;
+            }
+            final CellType cellType = cell.getCellType();
+            if (cellType == CellType.BLANK) {
+                continue;
+            }
+            if (cellType == CellType.STRING && cell.getStringCellValue().trim().isEmpty()) {
+                continue;
+            }
+            return false;
+        }
+        return true;
     }
 
 
