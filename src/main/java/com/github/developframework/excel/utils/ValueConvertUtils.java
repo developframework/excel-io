@@ -40,7 +40,8 @@ public class ValueConvertUtils {
                 } else if (targetClass == LocalDateTime.class) {
                     return LocalDateTime.parse(value, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
                 } else if (targetClass == ZonedDateTime.class) {
-                    return ZonedDateTime.parse(value, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+                    return LocalDateTime.parse(value, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
+                            .atZone(ZoneId.systemDefault());
                 } else if (targetClass == LocalDate.class) {
                     return LocalDate.parse(value);
                 } else if (targetClass == LocalTime.class) {
@@ -58,7 +59,7 @@ public class ValueConvertUtils {
 
     public static Object doubleConvert(String value, Class<?> targetClass) {
         if (targetClass == Double.class || targetClass == Double.TYPE) {
-            return value;
+            return Double.parseDouble(value);
         } else if (targetClass == String.class) {
             return value;
         } else if (targetClass == Integer.class || targetClass == Integer.TYPE) {
@@ -73,6 +74,31 @@ public class ValueConvertUtils {
             return Integer.parseInt(value) > 0;
         } else if (targetClass == BigDecimal.class) {
             return new BigDecimal(value);
+        } else {
+            return value;
+        }
+    }
+
+    /**
+     * 数值转换，不修改单元格内容
+     */
+    public static Object doubleConvert(double value, Class<?> targetClass) {
+        if (targetClass == Double.class || targetClass == Double.TYPE) {
+            return value;
+        } else if (targetClass == String.class) {
+            return Double.toString(value);
+        } else if (targetClass == Integer.class || targetClass == Integer.TYPE) {
+            return (int) value;
+        } else if (targetClass == Long.class || targetClass == Long.TYPE) {
+            return (long) value;
+        } else if (targetClass == Short.class || targetClass == Short.TYPE) {
+            return (short) value;
+        } else if (targetClass == Float.class || targetClass == Float.TYPE) {
+            return (float) value;
+        } else if (targetClass == Boolean.class || targetClass == Boolean.TYPE) {
+            return value > 0;
+        } else if (targetClass == BigDecimal.class) {
+            return BigDecimal.valueOf(value);
         } else {
             return value;
         }

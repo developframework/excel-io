@@ -147,8 +147,7 @@ public abstract class AbstractColumnDefinition<ENTITY, FIELD> implements ColumnD
                 if (DateUtil.isCellDateFormatted(cell)) {
                     value = ValueConvertUtils.dateConvert(cell.getDateCellValue(), fieldClass);
                 } else {
-                    cell.setCellType(CellType.STRING);
-                    value = ValueConvertUtils.doubleConvert(cell.getStringCellValue().trim(), fieldClass);
+                    value = ValueConvertUtils.doubleConvert(cell.getNumericCellValue(), fieldClass);
                 }
                 break;
             case BOOLEAN:
@@ -160,7 +159,7 @@ public abstract class AbstractColumnDefinition<ENTITY, FIELD> implements ColumnD
                         if (DateUtil.isCellDateFormatted(cell)) {
                             value = ValueConvertUtils.dateConvert(cell.getDateCellValue(), fieldClass);
                         } else {
-                            value = cell.getNumericCellValue();
+                            value = ValueConvertUtils.doubleConvert(cell.getNumericCellValue(), fieldClass);
                         }
                     }
                     break;

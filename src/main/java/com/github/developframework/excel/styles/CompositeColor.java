@@ -86,7 +86,11 @@ public class CompositeColor {
                 ((XSSFCellStyle) cellStyle).setBottomBorderColor(color);
                 ((XSSFCellStyle) cellStyle).setLeftBorderColor(color);
             } else {
-                cellStyle.setFillForegroundColor(IndexedColors.valueOf(color).index);
+                final short colorIndex = IndexedColors.valueOf(color).index;
+                cellStyle.setTopBorderColor(colorIndex);
+                cellStyle.setRightBorderColor(colorIndex);
+                cellStyle.setBottomBorderColor(colorIndex);
+                cellStyle.setLeftBorderColor(colorIndex);
             }
         } else {
             final HSSFPalette palette = ((HSSFWorkbook) workbook).getCustomPalette();

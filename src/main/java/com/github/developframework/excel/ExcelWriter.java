@@ -172,7 +172,7 @@ public class ExcelWriter extends ExcelProcessor {
                     // 自动列宽
                     sheet.autoSizeColumn(col);
                     // 解决自动设置列宽中文失效的问题
-                    sheet.setColumnWidth(col, Math.min(maxWidth, sheet.getColumnWidth(i)));
+                    sheet.setColumnWidth(col, Math.min(maxWidth, sheet.getColumnWidth(col)));
                 } else {
                     sheet.setColumnWidth(col, Math.min(maxWidth, columnInfo.columnWidth * 256));
                 }
